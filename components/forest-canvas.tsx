@@ -81,10 +81,22 @@ const fragmentShader = /* glsl */ `
     );
   }
 
-  float treeline(float x, float seed, float freq, float amp, float base) {
-    float h = base + fbm(vec2(x * freq + seed, seed)) * amp;
-    h += noise(vec2(x * freq * 9.0, seed * 2.0)) * amp * 0.18;
-    return h;
+  // a row of firs: one jittered triangular crown per cell
+  float conifers(float x, float density, float seed) {
+    float cell = floor(x * density);
+    float f = fract(x * density);
+    float h = hash(vec2(cell, seed));
+    float apex = 0.30 + 0.40 * hash(vec2(cell, seed + 7.0));
+    float tri = f < apex ? f / apex : (1.0 - f) / (1.0 - apex);
+    // slight concave sides so crowns read as pine, not sawtooth
+    tri = pow(tri, 1.35);
+    return tri * (0.30 + 0.70 * h);
+  }
+
+  float treeline(float x, float seed, float freq, float amp, float base,
+    float density, float treeAmp) {
+    float ridge = base + fbm(vec2(x * freq + seed, seed)) * amp;
+    return ridge + conifers(x, density, seed) * treeAmp;
   }
 
   void main() {
@@ -196,16 +208,19 @@ const fragmentShader = /* glsl */ `
     // ---- parallax treelines, rising with the descent
     float y = uv.y;
 
-    float hFar = treeline(uv.x + mx * 0.015, 7.3, 1.6, 0.10, 0.34 + rise * 0.40);
-    float silFar = smoothstep(hFar + 0.004, hFar - 0.004, y);
+    float hFar = treeline(uv.x + mx * 0.015, 7.3, 1.6, 0.07,
+      0.33 + rise * 0.40, 110.0, 0.030);
+    float silFar = smoothstep(hFar + 0.003, hFar - 0.003, y);
     col = mix(col, mix(col, skyTop * 0.55, 0.75), silFar);
 
-    float hMid = treeline(uv.x + mx * 0.035, 3.1, 2.4, 0.12, 0.26 + rise * 0.55);
-    float silMid = smoothstep(hMid + 0.004, hMid - 0.004, y);
+    float hMid = treeline(uv.x + mx * 0.035, 3.1, 2.4, 0.085,
+      0.245 + rise * 0.55, 62.0, 0.055);
+    float silMid = smoothstep(hMid + 0.0022, hMid - 0.0022, y);
     col = mix(col, skyTop * 0.32, silMid);
 
-    float hNear = treeline(uv.x + mx * 0.06, 11.7, 3.6, 0.13, 0.17 + rise * 0.75);
-    float silNear = smoothstep(hNear + 0.003, hNear - 0.003, y);
+    float hNear = treeline(uv.x + mx * 0.06, 11.7, 3.6, 0.09,
+      0.145 + rise * 0.75, 34.0, 0.085);
+    float silNear = smoothstep(hNear + 0.0016, hNear - 0.0016, y);
     col = mix(col, vec3(0.012, 0.014, 0.016), silNear);
 
     // ---- mist hugging the treetops
