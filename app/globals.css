@@ -1,0 +1,279 @@
+@import "tailwindcss";
+
+@theme {
+  /* sumi ink scale */
+  --color-ink-950: #0a0a0c;
+  --color-ink-900: #101014;
+  --color-ink-800: #16161c;
+  --color-ink-700: #232329;
+  --color-ink-600: #35353d;
+
+  /* kinari paper */
+  --color-paper: #eae3d2;
+  --color-paper-dim: #a9a294;
+  --color-paper-faint: #6e6960;
+
+  /* forest accents (BFL green) */
+  --color-forest: #1d2b22;
+  --color-pine: #34503e;
+  --color-moss: #6f8f76;
+  --color-celadon: #a3bfa8;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-shippori), "Hiragino Mincho ProN", "Yu Mincho",
+    Georgia, serif;
+
+  --animate-marquee: marquee 40s linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+body {
+  background: var(--color-ink-950);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-moss);
+  color: var(--color-ink-950);
+}
+
+/* paper grain over everything */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 0.9s steps(4) infinite;
+}
+
+@keyframes grain-shift {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-2%, 3%);
+  }
+  50% {
+    transform: translate(3%, -2%);
+  }
+  75% {
+    transform: translate(-3%, -3%);
+  }
+  100% {
+    transform: translate(2%, 2%);
+  }
+}
+
+.vertical-rl {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  letter-spacing: 0.5em;
+}
+
+/* brush underline for links */
+.brush-link {
+  position: relative;
+}
+
+.brush-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 1px;
+  width: 100%;
+  background: var(--color-moss);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brush-link:hover::after,
+.brush-link[data-active="true"]::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* recognition flash when someone draws an ensō */
+@keyframes enso-burst {
+  from {
+    width: 60px;
+    height: 60px;
+    opacity: 0.9;
+    transform: translate(-50%, -50%);
+  }
+  to {
+    width: 340px;
+    height: 340px;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.enso-burst {
+  animation: enso-burst 0.65s ease-out both;
+}
+
+/* fog drift for the 404 path */
+@keyframes fog-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(12%);
+  }
+}
+
+.fog {
+  animation: fog-drift 14s ease-in-out infinite alternate;
+}
+
+.fog-slow {
+  animation: fog-drift 22s ease-in-out infinite alternate-reverse;
+}
+
+/* post content rises in behind the whisked-in header */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.prose-ink > * {
+  animation: rise-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 1.2s;
+}
+
+.prose-ink > *:nth-child(1) {
+  animation-delay: 0.75s;
+}
+.prose-ink > *:nth-child(2) {
+  animation-delay: 0.84s;
+}
+.prose-ink > *:nth-child(3) {
+  animation-delay: 0.93s;
+}
+.prose-ink > *:nth-child(4) {
+  animation-delay: 1.02s;
+}
+.prose-ink > *:nth-child(5) {
+  animation-delay: 1.11s;
+}
+
+/* where scroll timelines exist, every block forms as it enters the page
+   instead of a one-shot stagger; images wipe in like a brush stroke */
+@supports (animation-timeline: view()) {
+  .prose-ink > * {
+    animation: rise-in ease-out both;
+    animation-delay: 0s;
+    animation-timeline: view();
+    animation-range: entry 5% entry 55%;
+  }
+
+  .prose-ink > *:nth-child(-n + 3) {
+    /* the opening lines still arrive with the header, not the scroll */
+    animation: rise-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 0.8s;
+    animation-timeline: auto;
+  }
+
+  .prose-ink > figure {
+    animation-name: ink-wipe-in;
+  }
+
+  .prose-ink > blockquote {
+    animation-name: quote-draw;
+  }
+}
+
+@keyframes ink-wipe-in {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes quote-draw {
+  from {
+    opacity: 0;
+    border-left-color: transparent;
+    transform: translateX(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* brush drop cap on the opening paragraph */
+.prose-ink > p:first-of-type::first-letter {
+  float: left;
+  padding-right: 0.14em;
+  font-family: var(--font-display);
+  font-size: 3.1em;
+  line-height: 0.82;
+  color: var(--color-celadon);
+}
+
+/* prose defaults for notion content */
+.prose-ink {
+  font-size: 1.075rem;
+  line-height: 1.85;
+  color: color-mix(in srgb, var(--color-paper) 88%, transparent);
+}
+
+.prose-ink a {
+  color: var(--color-celadon);
+  text-decoration: underline;
+  text-decoration-color: color-mix(
+    in srgb,
+    var(--color-celadon) 40%,
+    transparent
+  );
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s;
+}
+
+.prose-ink a:hover {
+  text-decoration-color: var(--color-celadon);
+}
