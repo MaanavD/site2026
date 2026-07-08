@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useLenis } from "lenis/react";
 import { motion } from "motion/react";
 import { transitionMotif } from "@/lib/sound";
 
@@ -47,7 +46,6 @@ const layers = [
 export function InkTransition({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const lenis = useLenis();
   const [phase, setPhase] = useState<Phase>("idle");
   const [glyph, setGlyph] = useState("間");
   const [morph, setMorph] = useState<MorphFrom | null>(null);
@@ -58,7 +56,7 @@ export function InkTransition({ children }: { children: React.ReactNode }) {
   const navigate = (href: string, morphFrom?: MorphFrom) => {
     if (phase !== "idle") return;
     if (href === pathname) {
-      lenis?.scrollTo(0, { duration: 1.2 });
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
     target.current = href;

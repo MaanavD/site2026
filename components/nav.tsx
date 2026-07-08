@@ -1,6 +1,5 @@
 "use client";
 
-import { useLenis } from "lenis/react";
 import { TransitionLink } from "./ink-transition";
 import { Gloss } from "./gloss";
 import { SoundToggle } from "./sound-toggle";
@@ -15,12 +14,13 @@ const links = [
 
 export function Nav() {
   const pathname = usePathname();
-  const lenis = useLenis();
 
   const scrollToHash = (e: React.MouseEvent, href: string) => {
     if (!href.startsWith("/#") || pathname !== "/") return;
     e.preventDefault();
-    lenis?.scrollTo(href.slice(1), { offset: -80, duration: 1.4 });
+    document
+      .querySelector(href.slice(1))
+      ?.scrollIntoView({ behavior: "smooth" });
     history.replaceState(null, "", href);
   };
 

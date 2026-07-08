@@ -81,24 +81,6 @@ const fragmentShader = /* glsl */ `
     );
   }
 
-  // a row of firs: one jittered triangular crown per cell
-  float conifers(float x, float density, float seed) {
-    float cell = floor(x * density);
-    float f = fract(x * density);
-    float h = hash(vec2(cell, seed));
-    float apex = 0.30 + 0.40 * hash(vec2(cell, seed + 7.0));
-    float tri = f < apex ? f / apex : (1.0 - f) / (1.0 - apex);
-    // slight concave sides so crowns read as pine, not sawtooth
-    tri = pow(tri, 1.35);
-    return tri * (0.30 + 0.70 * h);
-  }
-
-  float treeline(float x, float seed, float freq, float amp, float base,
-    float density, float treeAmp) {
-    float ridge = base + fbm(vec2(x * freq + seed, seed)) * amp;
-    return ridge + conifers(x, density, seed) * treeAmp;
-  }
-
   void main() {
     vec2 uv = gl_FragCoord.xy / u_resolution.xy;
     float aspect = u_resolution.x / u_resolution.y;
@@ -112,7 +94,6 @@ const fragmentShader = /* glsl */ `
     p *= 2.2;
 
     vec2 m = u_mouse;
-    float mx = m.x - 0.5;
     vec2 mp = vec2(m.x * aspect, m.y) * 2.2;
     float md = exp(-distance(p, mp) * 1.4);
 
@@ -205,28 +186,10 @@ const fragmentShader = /* glsl */ `
       * max(0.0, sin(ang * 5.0 - t * 0.1));
     col += sunCol * rays * exp(-sd * 2.4) * rayAmt * 0.20 * sunFade;
 
-    // ---- parallax treelines, rising with the descent
-    float y = uv.y;
-
-    float hFar = treeline(uv.x + mx * 0.015, 7.3, 1.6, 0.07,
-      0.33 + rise * 0.40, 110.0, 0.030);
-    float silFar = smoothstep(hFar + 0.003, hFar - 0.003, y);
-    col = mix(col, mix(col, skyTop * 0.55, 0.75), silFar);
-
-    float hMid = treeline(uv.x + mx * 0.035, 3.1, 2.4, 0.085,
-      0.245 + rise * 0.55, 62.0, 0.055);
-    float silMid = smoothstep(hMid + 0.0022, hMid - 0.0022, y);
-    col = mix(col, skyTop * 0.32, silMid);
-
-    float hNear = treeline(uv.x + mx * 0.06, 11.7, 3.6, 0.09,
-      0.145 + rise * 0.75, 34.0, 0.085);
-    float silNear = smoothstep(hNear + 0.0016, hNear - 0.0016, y);
-    col = mix(col, vec3(0.012, 0.014, 0.016), silNear);
-
-    // ---- mist hugging the treetops
+    // ---- low drifting mist
     float mist = fbm(vec2(uv.x * 2.4 + t * 0.03, uv.y * 6.0 - t * 0.01));
-    float mistBand = smoothstep(0.45, 0.18, abs(y - hMid - 0.02) * 6.0);
-    col += skyHor * mist * mistBand * mistAmt * 0.5;
+    float mistBand = smoothstep(0.5, 0.0, uv.y);
+    col += skyHor * mist * mistBand * mistAmt * 0.35;
 
     // ---- interactive ink smoke
     vec2 ip = p + md * 0.55 * vec2(

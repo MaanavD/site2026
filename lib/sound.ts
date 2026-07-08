@@ -23,12 +23,23 @@ function ensureCtx() {
   return ctx;
 }
 
+// browsers suspend idle AudioContexts; notes scheduled while suspended are
+// silently dropped, so every sound waits for a confirmed-running context
+function whenRunning(cb: (c: AudioContext) => void) {
+  const c = ensureCtx();
+  if (c.state === "running") cb(c);
+  else c.resume().then(() => cb(c)).catch(() => {});
+}
+
 // yo scale on D (D E G A B): no semitones, open and serene
 const SCALE = [146.83, 164.81, 196.0, 220.0, 246.94, 293.66, 329.63, 392.0];
 
 export function pluck(noteIndex?: number, gain = 0.13) {
   if (!enabled) return;
-  const c = ensureCtx();
+  whenRunning((c) => pluckNow(c, noteIndex, gain));
+}
+
+function pluckNow(c: AudioContext, noteIndex?: number, gain = 0.13) {
   const idx =
     noteIndex !== undefined
       ? ((noteIndex % SCALE.length) + SCALE.length) % SCALE.length
@@ -80,7 +91,10 @@ export function transitionMotif() {
 // hanko stamp: a soft press into paper, no drum
 export function stamp() {
   if (!enabled) return;
-  const c = ensureCtx();
+  whenRunning(stampNow);
+}
+
+function stampNow(c: AudioContext) {
   const t = c.currentTime;
 
   const n = Math.floor(c.sampleRate * 0.14);
@@ -145,6 +159,10 @@ function ensureWind() {
 
 export function windPulse(intensity: number) {
   if (!enabled) return;
+  whenRunning(() => windPulseNow(intensity));
+}
+
+function windPulseNow(intensity: number) {
   const c = ensureCtx();
   const w = ensureWind();
   const t = c.currentTime;

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Shippori_Mincho } from "next/font/google";
 import "./globals.css";
-import { SmoothScroll } from "@/components/smooth-scroll";
 import { InkTransition } from "@/components/ink-transition";
 import { EnsoListener } from "@/components/enso-listener";
 import { Nav } from "@/components/nav";
@@ -44,14 +43,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${shippori.variable} h-full antialiased`}
     >
       <body className="grain min-h-full flex flex-col">
-        <SmoothScroll>
-          <InkTransition>
-            <Nav />
-            <main className="flex-1">{children}</main>
-            <Footer />
-            <EnsoListener />
-          </InkTransition>
-        </SmoothScroll>
+        <InkTransition>
+          <Nav />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <EnsoListener />
+        </InkTransition>
       </body>
     </html>
   );
