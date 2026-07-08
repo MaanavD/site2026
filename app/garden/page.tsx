@@ -10,6 +10,19 @@ export const metadata: Metadata = {
   title: "The Rangoli Courtyard",
   description:
     "A hidden courtyard where every piece of writing draws its own rangoli.",
+  openGraph: {
+    title: "The Rangoli Courtyard · Maanav Dalal",
+    description:
+      "A hidden courtyard where every piece of writing draws its own rangoli.",
+    url: "/garden",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Rangoli Courtyard · Maanav Dalal",
+    description:
+      "A hidden courtyard where every piece of writing draws its own rangoli.",
+  },
   robots: { index: false },
 };
 

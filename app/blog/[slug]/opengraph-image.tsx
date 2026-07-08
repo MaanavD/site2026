@@ -20,6 +20,7 @@ export default async function Image({
     kicker: [post?.category, post?.date ? formatDate(post.date) : null]
       .filter(Boolean)
       .join(" · "),
+    subtitle: "A field note from Maanav Dalal.",
     watermark: "paisley",
   });
 }

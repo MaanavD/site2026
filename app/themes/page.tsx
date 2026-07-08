@@ -4,7 +4,21 @@ import { ThemeHero } from "@/components/themes/theme-hero";
 
 export const metadata: Metadata = {
   title: "Theme Study · Indian Craft Minimal",
-  description: "The living style tile behind the current skin of maanavdalal.com.",
+  description:
+    "The living style tile behind the current skin of maanavdalal.com.",
+  openGraph: {
+    title: "Indian Craft Minimal · Maanav Dalal",
+    description:
+      "The living style tile behind the current skin of maanavdalal.com.",
+    url: "/themes",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Indian Craft Minimal · Maanav Dalal",
+    description:
+      "The living style tile behind the current skin of maanavdalal.com.",
+  },
   robots: { index: false },
 };
 

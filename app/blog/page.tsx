@@ -11,6 +11,17 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Writing",
   description: "Meanderings, reviews, and lists by Maanav Dalal.",
+  openGraph: {
+    title: "Writing · Maanav Dalal",
+    description: "Meanderings, reviews, and lists by Maanav Dalal.",
+    url: "/blog",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Writing · Maanav Dalal",
+    description: "Meanderings, reviews, and lists by Maanav Dalal.",
+  },
 };
 
 export default async function BlogPage() {

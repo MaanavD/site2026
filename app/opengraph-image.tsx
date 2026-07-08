@@ -8,6 +8,8 @@ export default function Image() {
   return dyeCard({
     title: "Maanav Dalal",
     kicker: "Developer Relations · Black Forest Labs",
+    subtitle:
+      "Building demos, giving talks, and writing about AI, design, and life.",
     watermark: "tree",
   });
 }

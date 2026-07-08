@@ -6,6 +6,9 @@ import { EnsoListener } from "@/components/enso-listener";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 
+const siteDescription =
+  "Developer Relations Engineer at Black Forest Labs. Building demos, giving talks, and writing about AI, design, and life.";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -28,8 +31,23 @@ export const metadata: Metadata = {
     default: "Maanav Dalal",
     template: "%s · Maanav Dalal",
   },
-  description:
-    "Developer Relations Engineer at Black Forest Labs. Building demos, giving talks, and writing about AI, design, and life.",
+  description: siteDescription,
+  applicationName: "Maanav Dalal",
+  authors: [{ name: "Maanav Dalal", url: "https://www.maanavdalal.com" }],
+  creator: "Maanav Dalal",
+  openGraph: {
+    title: "Maanav Dalal",
+    description: siteDescription,
+    url: "/",
+    siteName: "Maanav Dalal",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Maanav Dalal",
+    description: siteDescription,
+  },
 };
 
 export default function RootLayout({

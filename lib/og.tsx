@@ -11,6 +11,12 @@ const rozha = readFile(
 // the same motif paths as components/motifs.tsx (Phosphor Icons, MIT),
 // re-declared here because Satori needs explicit sizes and plain SVGs
 const FAINT = "rgba(236, 226, 204, 0.05)";
+const INK = "#0e1220";
+const PAPER = "#ece2cc";
+const PAPER_DIM = "#b5ac97";
+const MADDER = "#8f3b2e";
+const TURMERIC = "#d9a441";
+const PEACOCK = "#1f5f5b";
 
 const LOTUS_FILL =
   "M245.83,121.63a15.53,15.53,0,0,0-9.52-7.33,73.55,73.55,0,0,0-22.17-2.22c4-19.85,1-35.55-2-44.86a16.17,16.17,0,0,0-18.8-10.88,85.53,85.53,0,0,0-28.55,12.12,94.58,94.58,0,0,0-27.11-33.25,16.05,16.05,0,0,0-19.26,0A94.58,94.58,0,0,0,91.26,68.46,85.53,85.53,0,0,0,62.71,56.34,16.14,16.14,0,0,0,43.92,67.22c-3,9.31-6,25-2.06,44.86a73.55,73.55,0,0,0-22.17,2.22,15.53,15.53,0,0,0-9.52,7.33,16,16,0,0,0-1.6,12.26c3.39,12.58,13.8,36.49,45.33,55.33S113.13,208,128.05,208s42.67,0,74-18.78c31.53-18.84,41.94-42.75,45.33-55.33A16,16,0,0,0,245.83,121.63ZM62.1,175.49C35.47,159.57,26.82,140.05,24,129.7a59.61,59.61,0,0,1,22.5-1.17,129.08,129.08,0,0,0,9.15,19.41,142.28,142.28,0,0,0,34,39.56A114.92,114.92,0,0,1,62.1,175.49ZM128,190.4c-9.33-6.94-32-28.23-32-71.23C96,76.7,118.38,55.24,128,48c9.62,7.26,32,28.72,32,71.19C160,162.17,137.33,183.46,128,190.4Zm104-60.68c-2.77,10.24-11.4,29.81-38.09,45.77a114.92,114.92,0,0,1-27.55,12,142.28,142.28,0,0,0,34-39.56,129.08,129.08,0,0,0,9.15-19.41A59.69,59.69,0,0,1,232,129.71Z";
@@ -54,15 +60,73 @@ function PaisleyWatermark({ size, color }: { size: number; color: string }) {
 
 type Watermark = "lotus" | "paisley" | "tree";
 
+function WatermarkShape({
+  watermark,
+  size,
+  color,
+}: {
+  watermark: Watermark;
+  size: number;
+  color: string;
+}) {
+  if (watermark === "paisley") {
+    return <PaisleyWatermark size={size} color={color} />;
+  }
+
+  if (watermark === "tree") {
+    return <TreeWatermark size={size} color={color} />;
+  }
+
+  return <LotusWatermark size={size} color={color} />;
+}
+
+function CornerButi({
+  x,
+  y,
+  color,
+}: {
+  x: number;
+  y: number;
+  color: string;
+}) {
+  return (
+    <svg
+      width={108}
+      height={108}
+      viewBox="0 0 108 108"
+      style={{ position: "absolute", left: x, top: y }}
+    >
+      <circle cx="54" cy="54" r="42" fill="none" stroke={color} strokeWidth="2" />
+      <circle cx="54" cy="54" r="8" fill={color} opacity="0.8" />
+      {Array.from({ length: 8 }, (_, i) => (
+        <ellipse
+          key={i}
+          cx="54"
+          cy="24"
+          rx="5"
+          ry="15"
+          fill={color}
+          opacity="0.45"
+          transform={`rotate(${i * 45} 54 54)`}
+        />
+      ))}
+    </svg>
+  );
+}
+
 export async function dyeCard({
   title,
   kicker,
   watermark,
+  subtitle,
 }: {
   title: string;
   kicker: string;
   watermark: Watermark;
+  subtitle?: string;
 }) {
+  const titleSize = title.length > 62 ? 50 : title.length > 42 ? 60 : 76;
+
   return new ImageResponse(
     (
       <div
@@ -70,9 +134,8 @@ export async function dyeCard({
           width: "100%",
           height: "100%",
           display: "flex",
-          background:
-            "radial-gradient(900px 500px at 85% 10%, #1c2642 0%, #0e1220 55%)",
-          color: "#ece2cc",
+          background: INK,
+          color: PAPER,
           fontFamily: "Rozha",
           position: "relative",
         }}
@@ -81,68 +144,136 @@ export async function dyeCard({
           style={{
             display: "flex",
             position: "absolute",
-            right: -40,
-            bottom: -110,
+            inset: 0,
+            background:
+              "radial-gradient(760px 480px at 84% 16%, rgba(217, 164, 65, 0.18) 0%, rgba(31, 95, 91, 0.12) 34%, rgba(14, 18, 32, 0) 68%)",
+          }}
+        />
+        <div
+          style={{
+            display: "flex",
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: "100%",
+            height: 18,
+            background: `linear-gradient(90deg, ${MADDER}, ${TURMERIC} 42%, ${PEACOCK})`,
+          }}
+        />
+        <CornerButi x={66} y={64} color="rgba(217, 164, 65, 0.18)" />
+        <CornerButi x={998} y={460} color="rgba(236, 226, 204, 0.10)" />
+        <div
+          style={{
+            display: "flex",
+            position: "absolute",
+            right: -84,
+            bottom: -132,
           }}
         >
-          {watermark === "lotus" && <LotusWatermark size={460} color={FAINT} />}
-          {watermark === "paisley" && (
-            <PaisleyWatermark size={400} color={FAINT} />
-          )}
-          {watermark === "tree" && <TreeWatermark size={420} color={FAINT} />}
+          <WatermarkShape watermark={watermark} size={520} color={FAINT} />
         </div>
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
-            padding: "72px 80px",
+            margin: 42,
+            padding: "48px 56px 42px",
             width: "100%",
+            border: "1px solid rgba(236, 226, 204, 0.16)",
+            boxShadow: "inset 0 0 0 8px rgba(236, 226, 204, 0.035)",
+            background:
+              "linear-gradient(135deg, rgba(28, 38, 66, 0.92), rgba(14, 18, 32, 0.78))",
           }}
         >
-          <div
-            style={{
-              fontSize: 24,
-              letterSpacing: 6,
-              color: "#d9a441",
-              textTransform: "uppercase",
-            }}
-          >
-            {kicker}
+          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+            <div
+              style={{
+                display: "flex",
+                width: 66,
+                height: 66,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 999,
+                background: TURMERIC,
+                boxShadow: `0 0 0 8px ${MADDER}`,
+              }}
+            >
+              <LotusWatermark size={44} color={INK} />
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 22,
+                  letterSpacing: 5,
+                  color: TURMERIC,
+                  textTransform: "uppercase",
+                }}
+              >
+                {kicker}
+              </div>
+              <div style={{ fontSize: 23, color: PAPER_DIM }}>
+                maanavdalal.com
+              </div>
+            </div>
           </div>
           <div
             style={{
-              fontSize: title.length > 42 ? 58 : 76,
-              lineHeight: 1.15,
-              maxWidth: 900,
-              color: "#ece2cc",
+              display: "flex",
+              flexDirection: "column",
+              gap: 20,
+              maxWidth: 890,
             }}
           >
-            {title}
+            <div
+              style={{
+                fontSize: titleSize,
+                lineHeight: 1.04,
+                color: PAPER,
+              }}
+            >
+              {title}
+            </div>
+            {subtitle && (
+              <div
+                style={{
+                  maxWidth: 720,
+                  fontSize: 28,
+                  lineHeight: 1.32,
+                  color: PAPER_DIM,
+                }}
+              >
+                {subtitle}
+              </div>
+            )}
           </div>
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 20,
+              justifyContent: "space-between",
+              color: PAPER_DIM,
             }}
           >
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                width: 54,
-                height: 54,
-                background: "#8f3b2e",
-                borderRadius: 4,
-                transform: "rotate(3deg)",
+                gap: 14,
               }}
             >
-              <LotusWatermark size={36} color="#ece2cc" />
+              <div style={{ width: 64, height: 2, background: MADDER }} />
+              <div style={{ width: 64, height: 2, background: TURMERIC }} />
+              <div style={{ width: 64, height: 2, background: PEACOCK }} />
             </div>
-            <div style={{ fontSize: 26, color: "#b5ac97" }}>
-              Maanav Dalal · maanavdalal.com
+            <div style={{ fontSize: 26 }}>
+              Developer Relations · Black Forest Labs
             </div>
           </div>
         </div>
