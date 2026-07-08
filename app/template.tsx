@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { useInkTransition } from "@/components/ink-transition";
 
-// Remounts on every route change — pages rise into place as the ink lifts.
+// Remounts on every route change, pages rise into place as the ink lifts.
 // During a title morph the page must NOT move, or the landing spot the
 // overlay measured would drift and the title would animate twice.
 export default function Template({ children }: { children: React.ReactNode }) {

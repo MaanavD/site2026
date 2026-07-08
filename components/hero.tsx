@@ -4,9 +4,12 @@ import { useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, useScroll, useTransform } from "motion/react";
 import { Gloss } from "./gloss";
+import { TreeOfLife } from "./motifs";
 import { useWind } from "./use-wind";
 
-const ForestCanvas = dynamic(() => import("./forest-canvas"), { ssr: false });
+const StepwellCanvas = dynamic(() => import("./stepwell-canvas"), {
+  ssr: false,
+});
 
 const name = "Maanav Dalal";
 
@@ -15,7 +18,7 @@ export function Hero() {
   useWind(sectionRef);
 
   // the descent rides the normal scroll: as the hero leaves the viewport,
-  // the treelines rise past — no extra scroll length
+  // the stepwell's tiers rise past, no extra scroll length
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
@@ -27,23 +30,25 @@ export function Hero() {
       ref={sectionRef}
       className="relative flex h-svh min-h-[640px] items-center overflow-hidden"
     >
-      <ForestCanvas descend={scrollYProgress} />
+      <StepwellCanvas descend={scrollYProgress} />
 
-        {/* forest watermark, a nod to the Black Forest */}
+        {/* a small printed forest, a nod to the Black Forest */}
         <span
           aria-hidden
-          className="pointer-events-none absolute -right-10 top-1/2 -translate-y-1/2 select-none font-display text-[24rem] leading-none text-paper/3 md:text-[34rem]"
+          className="pointer-events-none absolute -right-16 top-1/2 flex -translate-y-1/2 select-none items-end text-paper/4"
         >
-          森
+          <TreeOfLife className="w-56 md:w-72" />
+          <TreeOfLife className="-ml-16 w-72 md:w-96" />
+          <TreeOfLife className="-ml-16 w-52 md:w-64" />
         </span>
 
         <Gloss
-          gloss="kuroi mori no kenkyūjo · Black Forest Laboratory"
+          gloss="where I work, printed where I live"
           side="left"
           className="absolute right-8 top-1/2 hidden -translate-y-1/2 md:flex"
         >
-          <span className="vertical-rl select-none font-display text-sm text-paper-faint transition-colors duration-300 hover:text-moss">
-            黒い森の研究所
+          <span className="select-none font-mono text-[10px] uppercase tracking-[0.35em] text-paper-faint transition-colors duration-300 hover:text-madder [writing-mode:vertical-rl]">
+            a black forest, block printed
           </span>
         </Gloss>
 
@@ -52,7 +57,7 @@ export function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="font-mono text-xs uppercase tracking-[0.4em] text-celadon"
+            className="font-mono text-xs uppercase tracking-[0.4em] text-turmeric"
           >
             Developer Relations · Black Forest Labs
           </motion.p>
@@ -103,7 +108,7 @@ export function Hero() {
           className="h-14 w-px overflow-hidden bg-paper/15"
         >
           <motion.div
-            className="h-1/2 w-full bg-moss"
+            className="h-1/2 w-full bg-madder"
             animate={{ y: ["-100%", "200%"] }}
             transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
           />

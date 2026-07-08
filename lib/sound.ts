@@ -1,4 +1,5 @@
-// Synthesized koto/biwa plucks via Karplus-Strong, plus a wind layer.
+// Synthesized santoor via Karplus-Strong, played in Raag Bhupali,
+// with a shared reverb so everything sits in the same quiet room.
 // No audio files. Muted by default; the visitor opts in via the nav toggle.
 
 let ctx: AudioContext | null = null;
@@ -31,8 +32,39 @@ function whenRunning(cb: (c: AudioContext) => void) {
   else c.resume().then(() => cb(c)).catch(() => {});
 }
 
-// yo scale on D (D E G A B): no semitones, open and serene
-const SCALE = [146.83, 164.81, 196.0, 220.0, 246.94, 293.66, 329.63, 392.0];
+// one shared bus: dry signal plus a soft 2-second room, so plucks ring
+// instead of stopping dead (the dryness was what read as "un-serene")
+let bus: GainNode | null = null;
+
+function ensureBus(c: AudioContext) {
+  if (bus) return bus;
+  bus = c.createGain();
+  bus.gain.value = 1;
+  bus.connect(c.destination);
+
+  const dur = 2.2;
+  const len = Math.floor(c.sampleRate * dur);
+  const ir = c.createBuffer(2, len, c.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = ir.getChannelData(ch);
+    for (let i = 0; i < len; i++) {
+      d[i] = (Math.random() * 2 - 1) * Math.exp((-3.2 * i) / len);
+    }
+  }
+  const verb = c.createConvolver();
+  verb.buffer = ir;
+  const wet = c.createGain();
+  wet.gain.value = 0.3;
+  bus.connect(verb);
+  verb.connect(wet);
+  wet.connect(c.destination);
+  return bus;
+}
+
+// Raag Bhupali on D (Sa Re Ga Pa Dha = D E F# A B): no semitones, serene
+const SCALE = [
+  146.83, 164.81, 185.0, 220.0, 246.94, 293.66, 329.63, 369.99, 440.0, 493.88,
+];
 
 export function pluck(noteIndex?: number, gain = 0.13) {
   if (!enabled) return;
@@ -46,7 +78,19 @@ function pluckNow(c: AudioContext, noteIndex?: number, gain = 0.13) {
       : Math.floor(Math.random() * SCALE.length);
   const freq = SCALE[idx];
 
-  const dur = 1.8;
+  // a santoor strike is really two: the hammer touches the string twice,
+  // and its paired strings are never perfectly in tune with each other
+  strikeString(c, freq, gain, 0);
+  strikeString(c, freq * 1.004, gain * 0.55, 0.024);
+}
+
+function strikeString(
+  c: AudioContext,
+  freq: number,
+  gain: number,
+  offset: number
+) {
+  const dur = 2.2;
   const sr = c.sampleRate;
   const n = Math.floor(sr * dur);
   const buf = c.createBuffer(1, n, sr);
@@ -60,7 +104,7 @@ function pluckNow(c: AudioContext, noteIndex?: number, gain = 0.13) {
   for (let i = 0; i < n; i++) {
     const cur = ring[ri];
     const nxt = ring[(ri + 1) % period];
-    ring[ri] = 0.5 * (cur + nxt) * 0.9962;
+    ring[ri] = 0.5 * (cur + nxt) * 0.9975;
     data[i] = cur;
     ri = (ri + 1) % period;
   }
@@ -69,26 +113,48 @@ function pluckNow(c: AudioContext, noteIndex?: number, gain = 0.13) {
   src.buffer = buf;
   const lp = c.createBiquadFilter();
   lp.type = "lowpass";
-  lp.frequency.value = 1900;
+  lp.frequency.value = 1550;
   const g = c.createGain();
-  g.gain.setValueAtTime(gain, c.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
-  src.connect(lp).connect(g).connect(c.destination);
-  src.start();
+  const t = c.currentTime + offset;
+  g.gain.setValueAtTime(gain, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(lp).connect(g).connect(ensureBus(c));
+  src.start(t);
 }
 
-// short rising phrase for page transitions: gentle, open intervals only
+// canonical Bhupali phrases (indices into SCALE, 0 = Sa), always calm,
+// always resolving upward: the raag's own vocabulary instead of dice
+const PHRASES = [
+  [0, 2, 3], // Sa Ga Pa
+  [2, 3, 4], // Ga Pa Dha
+  [3, 4, 5], // Pa Dha Sa'
+  [0, 3, 5], // Sa Pa Sa'
+  [2, 3, 5], // Ga Pa Sa'
+];
+
+function playPhrase(phrase: number[], gains: number[], spacing = 160) {
+  phrase.forEach((note, i) => {
+    const jitter = Math.random() * 30;
+    setTimeout(() => pluck(note, gains[i] ?? 0.06), i * spacing + jitter);
+  });
+}
+
+// a short phrase for page transitions
 export function transitionMotif() {
   if (!enabled) return;
-  const base = 1 + Math.floor(Math.random() * 3);
-  pluck(base, 0.09);
-  setTimeout(() => pluck(base + 2, 0.07), 140 + Math.random() * 50);
-  if (Math.random() < 0.5) {
-    setTimeout(() => pluck(base + 5, 0.05), 330 + Math.random() * 70);
-  }
+  playPhrase(
+    PHRASES[Math.floor(Math.random() * PHRASES.length)],
+    [0.09, 0.075, 0.06]
+  );
 }
 
-// hanko stamp: a soft press into paper, no drum
+// the greeting when sound is switched on: Sa, Pa, upper Sa
+export function chime() {
+  if (!enabled) return;
+  playPhrase([0, 3, 5], [0.08, 0.07, 0.06], 190);
+}
+
+// blockprint stamp: a wood block pressed into cloth, no drum
 export function stamp() {
   if (!enabled) return;
   whenRunning(stampNow);
@@ -108,19 +174,30 @@ function stampNow(c: AudioContext) {
   noise.buffer = buf;
   const bp = c.createBiquadFilter();
   bp.type = "bandpass";
-  bp.frequency.value = 620;
-  bp.Q.value = 1.1;
+  bp.frequency.value = 340;
+  bp.Q.value = 0.8;
   const ng = c.createGain();
-  ng.gain.setValueAtTime(0.11, t);
+  ng.gain.setValueAtTime(0.09, t);
   ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
-  noise.connect(bp).connect(ng).connect(c.destination);
+  noise.connect(bp).connect(ng).connect(ensureBus(c));
   noise.start(t);
 
+  // the wood's single soft knock under the cloth
+  const knock = c.createOscillator();
+  knock.type = "sine";
+  knock.frequency.value = 90;
+  const kg = c.createGain();
+  kg.gain.setValueAtTime(0.055, t);
+  kg.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+  knock.connect(kg).connect(ensureBus(c));
+  knock.start(t);
+  knock.stop(t + 0.1);
+
   // the faintest low string under the press
-  pluck(0, 0.045);
+  pluck(0, 0.04);
 }
 
-// wind that follows the pointer across the hero ink
+// wind that follows the pointer across the hero (kept dry: it's the room)
 let wind: { gain: GainNode; filter: BiquadFilterNode } | null = null;
 
 function ensureWind() {

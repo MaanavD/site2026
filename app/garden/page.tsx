@@ -7,12 +7,13 @@ import { TransitionLink } from "@/components/ink-transition";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "The Ink Garden",
-  description: "A hidden garden where every piece of writing grows an ensō.",
+  title: "The Rangoli Courtyard",
+  description:
+    "A hidden courtyard where every piece of writing draws its own rangoli.",
   robots: { index: false },
 };
 
-// deterministic per-slug randomness so each plant is stable across builds
+// deterministic per-slug randomness so each rangoli is stable across builds
 function rng(seed: string) {
   let h = 2166136261;
   for (let i = 0; i < seed.length; i++) {
@@ -26,61 +27,124 @@ function rng(seed: string) {
   };
 }
 
-const GREENS = ["#6f8f76", "#a3bfa8", "#34503e", "#8aa88f"];
+const POWDERS = ["#8f3b2e", "#d9a441", "#1f5f5b", "#c9bfa8"];
 
-function EnsoPlant({ seed }: { seed: string }) {
+type Ring = {
+  kind: number; // 0 dots, 1 petals, 2 diamonds, 3 arc
+  radius: number;
+  color: string;
+  phase: number;
+  size: number;
+};
+
+function Rangoli({ seed }: { seed: string }) {
   const r = rng(seed);
-  const color = GREENS[Math.floor(r() * GREENS.length)];
-  const radius = 26 + r() * 12;
-  const open = 0.78 + r() * 0.16; // how closed the circle is
-  const rotate = Math.floor(r() * 360);
-  const width = 2.5 + r() * 3.5;
-  const wobbleFreq = 0.035 + r() * 0.05;
-  const wobbleScale = 3 + r() * 5;
-  const stemLean = (r() - 0.5) * 22;
-  const circumference = 2 * Math.PI * radius;
-  const fid = `w-${seed.replace(/[^a-z0-9]/gi, "").slice(0, 12)}`;
+  const folds = [6, 8, 12][Math.floor(r() * 3)];
+  const ringCount = 2 + Math.floor(r() * 3);
+  const bindu = POWDERS[Math.floor(r() * 2)]; // madder or turmeric centre
+  const wobbleSeed = Math.floor(r() * 90);
+  const fid = `rg-${seed.replace(/[^a-z0-9]/gi, "").slice(0, 12)}`;
+
+  const rings: Ring[] = [];
+  let radius = 13;
+  for (let k = 0; k < ringCount; k++) {
+    radius += 10 + r() * 7;
+    rings.push({
+      kind: Math.floor(r() * 4),
+      radius,
+      color: POWDERS[Math.floor(r() * POWDERS.length)],
+      phase: r() * 360,
+      size: 2 + r() * 2.2,
+    });
+  }
+
+  const step = 360 / folds;
 
   return (
-    <svg viewBox="0 0 120 160" className="w-full" aria-hidden>
-      <filter id={fid} x="-30%" y="-30%" width="160%" height="160%">
+    <svg viewBox="0 0 120 120" className="w-full" aria-hidden>
+      <filter id={fid} x="-20%" y="-20%" width="140%" height="140%">
         <feTurbulence
           type="fractalNoise"
-          baseFrequency={wobbleFreq}
+          baseFrequency="0.06"
           numOctaves="2"
-          seed={Math.floor(r() * 90)}
+          seed={wobbleSeed}
         />
-        <feDisplacementMap in="SourceGraphic" scale={wobbleScale} />
+        <feDisplacementMap in="SourceGraphic" scale="2.2" />
       </filter>
       <g filter={`url(#${fid})`}>
-        <path
-          d={`M60 150 C ${60 + stemLean} 130, ${60 - stemLean * 0.6} 112, 60 ${60 + radius + 4}`}
-          stroke={color}
-          strokeWidth="2"
-          fill="none"
-          opacity="0.7"
-        />
         <circle
           cx="60"
           cy="60"
-          r={radius}
-          fill="none"
-          stroke={color}
-          strokeWidth={width}
-          strokeLinecap="round"
-          strokeDasharray={`${circumference * open} ${circumference}`}
-          transform={`rotate(${rotate} 60 60)`}
+          r={3 + r() * 1.5}
+          fill={bindu}
+          style={bloom(0)}
         />
-        <path
-          d={`M60 128 q ${8 + r() * 8} ${-4 - r() * 6} ${14 + r() * 8} ${-2 - r() * 4}`}
-          stroke={color}
-          strokeWidth="1.6"
-          fill="none"
-          opacity="0.55"
-        />
+        {rings.map((ring, k) => (
+          <g key={k} style={bloom(k + 1)}>
+            {ring.kind === 3 ? (
+              <circle
+                cx="60"
+                cy="60"
+                r={ring.radius}
+                fill="none"
+                stroke={ring.color}
+                strokeWidth="1.4"
+                strokeDasharray={`${((2 * Math.PI * ring.radius) / folds) * 0.55} ${((2 * Math.PI * ring.radius) / folds) * 0.45}`}
+                transform={`rotate(${ring.phase} 60 60)`}
+              />
+            ) : (
+              Array.from({ length: folds }, (_, i) => (
+                <g
+                  key={i}
+                  transform={`rotate(${ring.phase + i * step} 60 60)`}
+                >
+                  {ring.kind === 0 && (
+                    <circle
+                      cx="60"
+                      cy={60 - ring.radius}
+                      r={ring.size * 0.8}
+                      fill={ring.color}
+                    />
+                  )}
+                  {ring.kind === 1 && (
+                    <ellipse
+                      cx="60"
+                      cy={60 - ring.radius}
+                      rx={ring.size * 0.9}
+                      ry={ring.size * 2}
+                      fill="none"
+                      stroke={ring.color}
+                      strokeWidth="1.5"
+                    />
+                  )}
+                  {ring.kind === 2 && (
+                    <rect
+                      x={60 - ring.size}
+                      y={60 - ring.radius - ring.size}
+                      width={ring.size * 2}
+                      height={ring.size * 2}
+                      transform={`rotate(45 60 ${60 - ring.radius})`}
+                      fill={ring.color}
+                      opacity="0.85"
+                    />
+                  )}
+                </g>
+              ))
+            )}
+          </g>
+        ))}
       </g>
     </svg>
   );
+}
+
+// each ring blooms outward from the bindu, like powder poured ring by ring
+function bloom(k: number): React.CSSProperties {
+  return {
+    animation: "rangoli-bloom 0.7s cubic-bezier(0.22, 1, 0.36, 1) both",
+    animationDelay: `${k * 90}ms`,
+    transformOrigin: "60px 60px",
+  };
 }
 
 export default async function GardenPage() {
@@ -90,24 +154,21 @@ export default async function GardenPage() {
     <div className="relative mx-auto max-w-5xl px-6 pt-36 pb-28">
       <span
         aria-hidden
-        className="pointer-events-none absolute -top-4 right-0 select-none font-display text-[14rem] leading-none text-paper/4"
+        className="pointer-events-none absolute -top-10 right-0 w-64 select-none text-paper/5"
       >
-        庭
+        <Rangoli seed="courtyard" />
       </span>
       <Reveal>
-        <p className="font-mono text-xs uppercase tracking-[0.35em] text-moss">
+        <p className="font-mono text-xs uppercase tracking-[0.35em] text-turmeric">
           Secret Found
         </p>
         <h1 className="mt-4 font-display text-5xl text-paper md:text-6xl">
-          The Ink Garden
+          The Rangoli Courtyard
         </h1>
-        <p className="mt-3 font-mono text-[11px] text-paper-faint">
-          庭 niwa · &ldquo;garden&rdquo;
-        </p>
         <p className="mt-5 max-w-md text-paper-dim">
-          You drew a circle and the site noticed. Every piece of writing
-          planted here grows its own ensō: same seed, same plant, every visit.
-          The garden grows when I write.
+          You drew a circle and the site noticed. Every piece of writing here
+          draws its own rangoli: same seed, same pattern, every visit. The
+          courtyard grows when I write.
         </p>
       </Reveal>
 
@@ -116,20 +177,19 @@ export default async function GardenPage() {
           <Reveal key={post.id} delay={(i % 4) * 0.06}>
             <TransitionLink
               href={`/blog/${post.slug}`}
-              className="group block rounded-sm border border-paper/8 bg-ink-900/60 p-4 transition-colors hover:border-moss/40"
+              className="group block rounded-sm border border-paper/8 bg-ink-900/60 p-4 transition-colors hover:border-madder/40"
             >
-              <EnsoPlant seed={post.slug} />
+              <Rangoli seed={post.slug} />
               <p className="mt-2 truncate font-display text-sm text-paper-dim transition-colors group-hover:text-paper">
                 {post.title}
               </p>
               <p className="mt-1 font-mono text-[10px] text-paper-faint">
-                planted {formatDate(post.date)}
+                drawn {formatDate(post.date)}
               </p>
             </TransitionLink>
           </Reveal>
         ))}
       </div>
-
     </div>
   );
 }

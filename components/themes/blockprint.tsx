@@ -2,27 +2,12 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
+import { Buti } from "@/components/motifs";
 import { stamp as stampSound } from "@/lib/sound";
-
-// a buti (floral sprig) motif, the workhorse of Rajasthani blockprint
-function Buti({ color = "#8f3b2e" }: { color?: string }) {
-  return (
-    <svg viewBox="0 0 40 56" className="h-full w-full" aria-hidden>
-      <g fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round">
-        <path d="M20 50 C 20 38, 18 32, 20 22" />
-        <path d="M20 30 C 14 28, 11 24, 10 19" />
-        <path d="M20 34 C 26 32, 29 28, 30 23" />
-        <ellipse cx="20" cy="14" rx="7" ry="9" />
-        <path d="M20 8 C 22 11, 22 17, 20 20" />
-      </g>
-      <circle cx="20" cy="5" r="1.8" fill={color} />
-    </svg>
-  );
-}
 
 type Stamp = { x: number; rot: number; ink: number; id: number };
 
-// click along the cloth strip to hand-stamp motifs — every press lands
+// click along the cloth strip to hand-stamp motifs: every press lands
 // slightly crooked with uneven ink, like real blockprinting
 export function BlockprintStrip() {
   const [stamps, setStamps] = useState<Stamp[]>(() =>
@@ -60,10 +45,10 @@ export function BlockprintStrip() {
           initial={{ opacity: 0, scale: 1.25 }}
           animate={{ opacity: s.ink, scale: 1 }}
           transition={{ type: "spring", stiffness: 420, damping: 22 }}
-          className="absolute top-1/2 h-16 w-12 -translate-y-1/2"
+          className="absolute top-1/2 h-16 w-12 -translate-y-1/2 text-[#8f3b2e]"
           style={{ left: s.x, rotate: s.rot }}
         >
-          <Buti />
+          <Buti className="h-full w-full" />
         </motion.span>
       ))}
       <span className="absolute right-3 bottom-2 font-mono text-[10px] tracking-widest text-[#8f3b2e]/50">

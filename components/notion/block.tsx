@@ -24,7 +24,7 @@ const TodoCheckbox = ({
         id={id}
         checked={isChecked}
         onChange={() => setIsChecked(!isChecked)}
-        className="mt-1.5 h-4 w-4 appearance-none rounded-sm border border-paper/30 bg-transparent transition-colors checked:border-moss checked:bg-moss"
+        className="mt-1.5 h-4 w-4 appearance-none rounded-sm border border-paper/30 bg-transparent transition-colors checked:border-madder checked:bg-madder"
       />
       <div className={isChecked ? "text-paper-faint line-through" : ""}>
         {children}
@@ -53,7 +53,7 @@ export default function Block({ block }: { block: any }) {
       );
     case "heading_1":
       return (
-        <h2 className="mt-14 mb-5 border-l-2 border-moss pl-4 font-display text-3xl text-paper">
+        <h2 className="mt-14 mb-5 border-l-2 border-madder pl-4 font-display text-3xl text-paper">
           <Text text={value.rich_text} />
         </h2>
       );
@@ -96,7 +96,7 @@ export default function Block({ block }: { block: any }) {
       return (
         <details className="group my-4 rounded-sm border border-paper/10 bg-ink-900 p-4 open:border-paper/20">
           <summary className="cursor-pointer list-none font-medium text-paper">
-            <span className="mr-2 inline-block text-moss transition-transform duration-200 group-open:rotate-90">
+            <span className="mr-2 inline-block text-madder transition-transform duration-200 group-open:rotate-90">
               ▸
             </span>
             <Text text={value.rich_text} />
@@ -142,14 +142,14 @@ export default function Block({ block }: { block: any }) {
         >
           <span className="h-px w-16 bg-paper/15" />
           <Gloss gloss="ensō · the zen circle" side="top">
-            <span className="font-display text-moss/70">◯</span>
+            <span className="font-display text-madder/70">◯</span>
           </Gloss>
           <span className="h-px w-16 bg-paper/15" />
         </div>
       );
     case "quote":
       return (
-        <blockquote className="my-8 border-l-2 border-moss py-1 pl-6 font-display text-xl leading-relaxed text-paper/90 italic">
+        <blockquote className="my-8 border-l-2 border-madder py-1 pl-6 font-display text-xl leading-relaxed text-paper/90 italic">
           <Text text={value.rich_text} />
         </blockquote>
       );
@@ -163,7 +163,7 @@ export default function Block({ block }: { block: any }) {
             <span className="flex gap-1.5">
               <span className="h-2 w-2 rounded-full bg-paper/15" />
               <span className="h-2 w-2 rounded-full bg-paper/15" />
-              <span className="h-2 w-2 rounded-full bg-moss/60" />
+              <span className="h-2 w-2 rounded-full bg-madder/60" />
             </span>
           </div>
           <pre className="overflow-x-auto bg-ink-900 p-5">
@@ -182,7 +182,7 @@ export default function Block({ block }: { block: any }) {
           href={fileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="my-4 flex items-center gap-2 text-celadon underline underline-offset-4 hover:text-paper"
+          className="my-4 flex items-center gap-2 text-turmeric underline underline-offset-4 hover:text-paper"
         >
           {fileText} ↓
         </a>
@@ -195,9 +195,9 @@ export default function Block({ block }: { block: any }) {
           href={value.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="group my-6 block rounded-sm border border-paper/10 bg-ink-900 p-4 transition-colors hover:border-moss/50"
+          className="group my-6 block rounded-sm border border-paper/10 bg-ink-900 p-4 transition-colors hover:border-madder/50"
         >
-          <div className="truncate font-mono text-sm text-celadon">
+          <div className="truncate font-mono text-sm text-turmeric">
             {value.url}
           </div>
           {value.caption && (
@@ -212,12 +212,12 @@ export default function Block({ block }: { block: any }) {
         value.icon?.emoji ||
         value.icon?.file?.url ||
         value.icon?.external?.url ||
-        "灯";
+        "🪔";
       return (
-        <aside className="my-8 flex gap-4 rounded-sm border border-celadon/25 bg-celadon/5 p-5">
+        <aside className="my-8 flex gap-4 rounded-sm border border-turmeric/25 bg-turmeric/5 p-5">
           <span
             aria-hidden
-            className="shrink-0 font-display text-xl text-celadon"
+            className="shrink-0 font-display text-xl text-turmeric"
           >
             {typeof icon === "string" && icon.startsWith("http") ? "◦" : icon}
           </span>
@@ -331,7 +331,7 @@ export default function Block({ block }: { block: any }) {
       return (
         <a
           href={pageUrl}
-          className="my-4 block text-celadon underline underline-offset-4 hover:text-paper"
+          className="my-4 block text-turmeric underline underline-offset-4 hover:text-paper"
         >
           → Linked page
         </a>
@@ -345,7 +345,7 @@ export default function Block({ block }: { block: any }) {
           href={pdfUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="my-4 flex items-center gap-2 text-celadon underline underline-offset-4 hover:text-paper"
+          className="my-4 flex items-center gap-2 text-turmeric underline underline-offset-4 hover:text-paper"
         >
           Open PDF ↗
         </a>

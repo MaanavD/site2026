@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { isRead } from "@/lib/read-marks";
+import { LotusSeal } from "./motifs";
 
-// tiny 真 seal beside posts the visitor has finished
+// tiny lotus seal beside posts the visitor has finished
 export function ReadStamp({ slug }: { slug: string }) {
   const [read, setRead] = useState(false);
 
@@ -12,10 +13,10 @@ export function ReadStamp({ slug }: { slug: string }) {
 
   return (
     <span
-      title="読了 · you've read this"
-      className="ml-3 inline-flex rotate-6 rounded-[2px] border border-moss/50 px-1 font-display text-[11px] leading-relaxed text-moss"
+      title="you've read this one"
+      className="ml-3 inline-flex rotate-6 rounded-[2px] border border-madder/50 p-1 text-madder"
     >
-      真
+      <LotusSeal className="h-3 w-3" />
     </span>
   );
 }

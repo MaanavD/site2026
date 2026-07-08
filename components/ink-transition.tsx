@@ -11,6 +11,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { transitionMotif } from "@/lib/sound";
+import { Buti, LotusSeal, Paisley, TreeOfLife } from "./motifs";
 
 type Phase = "idle" | "covering" | "revealing";
 
@@ -33,12 +34,28 @@ const TransitionContext = createContext<TransitionApi>({
 
 export const useInkTransition = () => useContext(TransitionContext);
 
-// each destination gets its own seal character during the wipe
-const kanjiFor = (href: string) =>
-  href.startsWith("/blog") ? "筆" : href === "/" ? "森" : "間";
+// each destination gets its own block pressed mid-wipe
+const MOTIFS = {
+  paisley: Paisley,
+  tree: TreeOfLife,
+  lotus: LotusSeal,
+  buti: Buti,
+} as const;
 
+type MotifKey = keyof typeof MOTIFS;
+
+const motifFor = (href: string): MotifKey =>
+  href.startsWith("/blog")
+    ? "paisley"
+    : href === "/"
+      ? "tree"
+      : href.startsWith("/garden")
+        ? "lotus"
+        : "buti";
+
+// the stamp-pad kiss of madder first, then the dye takes the page
 const layers = [
-  { color: "var(--color-pine)", delay: 0 },
+  { color: "var(--color-madder)", delay: 0 },
   { color: "var(--color-ink-800)", delay: 0.07 },
   { color: "var(--color-ink-950)", delay: 0.14 },
 ];
@@ -47,7 +64,7 @@ export function InkTransition({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [phase, setPhase] = useState<Phase>("idle");
-  const [glyph, setGlyph] = useState("間");
+  const [glyph, setGlyph] = useState<MotifKey>("buti");
   const [morph, setMorph] = useState<MorphFrom | null>(null);
   const [morphTarget, setMorphTarget] = useState<MorphTarget | null>(null);
   const [morphDone, setMorphDone] = useState(true);
@@ -60,7 +77,7 @@ export function InkTransition({ children }: { children: React.ReactNode }) {
       return;
     }
     target.current = href;
-    setGlyph(kanjiFor(href));
+    setGlyph(motifFor(href));
     if (morphFrom) {
       setMorph(morphFrom);
       setMorphDone(false);
@@ -126,24 +143,28 @@ export function InkTransition({ children }: { children: React.ReactNode }) {
           />
         ))}
 
-        {/* seal kanji, hidden while a title is morphing through */}
-        {!morph && (
-          <motion.span
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-display text-7xl text-paper/80"
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: phase === "covering" ? 1 : 0,
-              scale: phase === "covering" ? 1 : 1.15,
-            }}
-            transition={
-              phase === "idle"
-                ? { duration: 0 }
-                : { duration: 0.45, delay: phase === "covering" ? 0.35 : 0 }
-            }
-          >
-            {glyph}
-          </motion.span>
-        )}
+        {/* seal motif, hidden while a title is morphing through */}
+        {!morph &&
+          (() => {
+            const Motif = MOTIFS[glyph];
+            return (
+              <motion.span
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-paper/80"
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: phase === "covering" ? 1 : 0,
+                  scale: phase === "covering" ? 1 : 1.15,
+                }}
+                transition={
+                  phase === "idle"
+                    ? { duration: 0 }
+                    : { duration: 0.45, delay: phase === "covering" ? 0.35 : 0 }
+                }
+              >
+                <Motif className="h-[72px] w-[72px]" />
+              </motion.span>
+            );
+          })()}
 
         {/* the clicked title rides the wipe and settles into the post header */}
         {morph && phase !== "idle" && (

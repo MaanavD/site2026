@@ -1,33 +1,30 @@
 import { Reveal } from "./reveal";
 
 export function SectionHeading({
-  kanji,
-  gloss,
+  motif,
   title,
   sub,
 }: {
-  kanji: string;
-  gloss: string;
+  motif?: React.ReactNode;
   title: string;
   sub?: string;
 }) {
   return (
     <Reveal className="relative mb-14">
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-16 -left-4 select-none font-display text-[10rem] leading-none text-paper/4"
-      >
-        {kanji}
-      </span>
-      <p className="font-mono text-xs uppercase tracking-[0.35em] text-moss">
+      {motif && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-14 -left-6 w-36 select-none text-paper/6"
+        >
+          {motif}
+        </span>
+      )}
+      <p className="font-mono text-xs uppercase tracking-[0.35em] text-turmeric">
         {sub}
       </p>
       <h2 className="mt-3 font-display text-4xl text-paper md:text-5xl">
         {title}
       </h2>
-      <p className="mt-3 font-mono text-[11px] text-paper-faint">
-        {kanji} {gloss}
-      </p>
     </Reveal>
   );
 }

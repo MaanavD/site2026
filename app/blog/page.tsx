@@ -4,6 +4,7 @@ import { getPosts } from "@/lib/notion";
 import { formatDate } from "@/lib/format";
 import { Reveal } from "@/components/reveal";
 import { ReadStamp } from "@/components/read-stamp";
+import { Paisley } from "@/components/motifs";
 
 export const revalidate = 3600;
 
@@ -25,12 +26,12 @@ export default async function BlogPage() {
     <div className="relative mx-auto max-w-4xl px-6 pt-36 pb-28">
       <span
         aria-hidden
-        className="pointer-events-none absolute -top-4 right-0 select-none font-display text-[14rem] leading-none text-paper/4"
+        className="pointer-events-none absolute -top-4 right-0 w-52 select-none text-paper/5"
       >
-        筆
+        <Paisley className="w-full" />
       </span>
       <Reveal>
-        <p className="font-mono text-xs uppercase tracking-[0.35em] text-moss">
+        <p className="font-mono text-xs uppercase tracking-[0.35em] text-turmeric">
           Writing
         </p>
         <h1 className="mt-4 font-display text-5xl text-paper md:text-6xl">
@@ -38,15 +39,12 @@ export default async function BlogPage() {
         </h1>
         <p className="mt-5 max-w-md text-paper-dim">
           Notes on life, AI, and everything in between. Written in Notion,
-          rendered in ink.
-        </p>
-        <p className="mt-3 font-mono text-[11px] text-paper-faint">
-          筆 fude · &ldquo;the brush&rdquo;
+          printed here by hand (well, by shader).
         </p>
       </Reveal>
 
       {posts[0]?.isMock && (
-        <p className="mt-8 rounded-sm border border-celadon/25 bg-celadon/5 p-4 font-mono text-xs text-celadon">
+        <p className="mt-8 rounded-sm border border-turmeric/25 bg-turmeric/5 p-4 font-mono text-xs text-turmeric">
           Preview data: set NOTION_TOKEN in .env.local to load real posts.
         </p>
       )}
@@ -71,13 +69,13 @@ export default async function BlogPage() {
                       <p className="mt-1 font-mono text-xs text-paper-faint">
                         {formatDate(post.date)}
                         {post.category && (
-                          <span className="ml-3 text-moss">
+                          <span className="ml-3 text-turmeric">
                             {post.category}
                           </span>
                         )}
                       </p>
                     </div>
-                    <span className="shrink-0 text-moss opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
+                    <span className="shrink-0 text-madder opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
                       →
                     </span>
                   </TransitionLink>

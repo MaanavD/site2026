@@ -1,14 +1,16 @@
 "use client";
 
+import { motion } from "motion/react";
 import { TransitionLink } from "./ink-transition";
 import { Gloss } from "./gloss";
+import { LotusSeal } from "./motifs";
 import { SoundToggle } from "./sound-toggle";
 import { usePathname } from "next/navigation";
 
 const links = [
+  { href: "/#about", label: "About" },
   { href: "/#work", label: "Work" },
   { href: "/blog", label: "Writing" },
-  { href: "/#about", label: "About" },
   { href: "/#contact", label: "Contact" },
 ];
 
@@ -25,19 +27,24 @@ export function Nav() {
   };
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50">
+    <header className="fixed top-0 inset-x-0 z-50 bg-gradient-to-b from-ink-950/90 via-ink-950/50 to-transparent">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <TransitionLink
           href="/"
           aria-label="Home"
           className="group flex items-center gap-3"
         >
-          <Gloss gloss='makoto · "truth, authenticity"' side="bottom">
-            <span className="flex h-9 w-9 items-center justify-center rounded-sm bg-moss font-display text-lg font-bold text-ink-950 transition-transform duration-300 group-hover:rotate-6">
-              真
-            </span>
+          <Gloss gloss="a lotus, carved like a stamp" side="bottom">
+            {/* the seal leaps when pressed. small, strong, back in a beat */}
+            <motion.span
+              whileTap={{ y: -9, rotate: 10, scale: 1.08 }}
+              transition={{ type: "spring", stiffness: 500, damping: 14 }}
+              className="flex h-9 w-9 items-center justify-center rounded-sm bg-madder text-ink-950 transition-transform duration-300 group-hover:rotate-6"
+            >
+              <LotusSeal className="h-6 w-6" />
+            </motion.span>
           </Gloss>
-          <span className="hidden font-display text-sm tracking-[0.2em] text-paper-dim uppercase transition-colors group-hover:text-paper sm:block">
+          <span className="hidden font-mono text-xs tracking-[0.25em] text-paper-dim uppercase transition-colors group-hover:text-paper sm:block">
             Maanav Dalal
           </span>
         </TransitionLink>

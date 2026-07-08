@@ -26,7 +26,7 @@ export default function Text({ text }: { text: any[] }) {
     const className = [
       bold ? "font-semibold text-paper" : "",
       code
-        ? "font-mono text-[0.9em] bg-ink-800 text-celadon px-1.5 py-0.5 rounded-sm"
+        ? "font-mono text-[0.9em] bg-ink-800 text-turmeric px-1.5 py-0.5 rounded-sm"
         : "",
       italic ? "italic" : "",
       strikethrough ? "line-through" : "",

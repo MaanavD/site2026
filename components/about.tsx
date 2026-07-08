@@ -2,14 +2,15 @@ import Image from "next/image";
 import { SectionHeading } from "./section-heading";
 import { Reveal } from "./reveal";
 import { Gloss } from "./gloss";
+import { LotusSeal } from "./motifs";
 
 const pursuits = [
-  { kanji: "柔", label: "Jiu-Jitsu", gloss: "jū · gentleness, as in 柔術 jūjutsu" },
-  { kanji: "登", label: "Climbing", gloss: "tō · to climb" },
-  { kanji: "雪", label: "Skiing", gloss: "yuki · snow" },
-  { kanji: "力", label: "Gym", gloss: "chikara · strength" },
-  { kanji: "珈", label: "Coffee", gloss: "ka · from 珈琲 kōhī" },
-  { kanji: "球", label: "(Bad) Tennis", gloss: "kyū · ball" },
+  "Jiu-Jitsu",
+  "Climbing",
+  "Skiing",
+  "Gym",
+  "Coffee",
+  "(Bad) Tennis",
 ];
 
 export function About() {
@@ -17,7 +18,7 @@ export function About() {
     <section id="about" className="relative scroll-mt-24 border-y border-paper/8 bg-ink-900/60">
       <div className="mx-auto grid max-w-6xl gap-16 px-6 py-28 md:grid-cols-[1fr_1.2fr] md:items-center">
         <Reveal className="relative mx-auto w-full max-w-sm">
-          <span className="absolute -left-3 -top-3 h-full w-full rounded-sm border border-moss/40" />
+          <span className="absolute -left-3 -top-3 h-full w-full rounded-sm border border-madder/40" />
           <div className="relative overflow-hidden rounded-sm">
             <Image
               src="/maanav.jpg"
@@ -27,26 +28,21 @@ export function About() {
               className="w-full object-cover grayscale-100 sepia-25 contrast-105"
               priority={false}
             />
-            <span className="pointer-events-none absolute inset-0 bg-moss/10 mix-blend-overlay" />
+            <span className="pointer-events-none absolute inset-0 bg-madder/10 mix-blend-overlay" />
           </div>
           <Gloss
-            gloss='makoto · "truth, authenticity"'
+            gloss="hand stamped, like everything here"
             side="top"
             className="absolute -bottom-4 -right-4"
           >
-            <span className="flex h-12 w-12 rotate-3 items-center justify-center rounded-sm bg-moss font-display text-xl font-bold text-ink-950">
-              真
+            <span className="flex h-12 w-12 rotate-3 items-center justify-center rounded-sm bg-madder text-ink-950">
+              <LotusSeal className="h-8 w-8" />
             </span>
           </Gloss>
         </Reveal>
 
         <div>
-          <SectionHeading
-            kanji="人"
-            gloss='hito · "person"'
-            sub="About"
-            title="Hey, I'm Maanav"
-          />
+          <SectionHeading sub="About" title="Hey, I'm Maanav" />
           <div className="space-y-5 text-base leading-relaxed text-paper-dim">
             <p>
               By day I do Developer Relations at{" "}
@@ -73,18 +69,39 @@ export function About() {
           <ul className="mt-10 grid grid-cols-3 gap-3 sm:grid-cols-6">
             {pursuits.map((p) => (
               <li
-                key={p.label}
-                className="group flex flex-col items-center gap-2 rounded-sm border border-paper/8 py-4 transition-colors hover:border-moss/50"
+                key={p}
+                className="group flex flex-col items-center gap-2 rounded-sm border border-paper/8 py-4 transition-colors hover:border-madder/50"
               >
-                <Gloss gloss={p.gloss} side="top">
-                  <span className="font-display text-2xl text-paper-dim transition-colors group-hover:text-celadon">
-                    {p.kanji}
-                  </span>
-                </Gloss>
-                <span className="text-[11px] text-paper-faint">{p.label}</span>
+                <span
+                  aria-hidden
+                  className="h-1.5 w-1.5 rounded-full bg-madder/60 transition-colors group-hover:bg-turmeric"
+                />
+                <span className="text-[11px] text-paper-faint">{p}</span>
               </li>
             ))}
           </ul>
+          <p className="mt-4 font-mono text-[10px] tracking-wide text-paper-faint">
+            strength and play, in equal measure
+          </p>
+          <p className="mt-6 font-mono text-[11px] text-paper-faint">
+            <a
+              className="brush-link hover:text-paper"
+              href="https://x.com/maanavdalal"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Twitter
+            </a>
+            <span className="mx-2 opacity-40">·</span>
+            <a
+              className="brush-link hover:text-paper"
+              href="https://www.linkedin.com/in/maanavdalal/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              LinkedIn
+            </a>
+          </p>
         </div>
       </div>
     </section>

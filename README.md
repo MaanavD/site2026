@@ -1,12 +1,12 @@
 # site2026
 
-Maanav's 2026 personal site. Dark Japandi — sumi ink, kinari paper,
-persimmon. WebGL ink shader hero, Notion-backed blog.
+Maanav's 2026 personal site. Indian craft minimal: vat indigo, khadi,
+madder, turmeric. WebGL stepwell hero, Notion-backed blog.
 
 ## Stack
 
 Next.js 16 (App Router) · React 19 · Tailwind 4 · motion · React Three
-Fiber · Lenis · Notion SDK v2 · Bun
+Fiber · Notion SDK v2 · Bun
 
 ## Run
 
@@ -21,6 +21,6 @@ still previewable.
 
 ## Imagery
 
-Generated with FLUX — prompts and the shared style DNA live in
+Generated with FLUX. Prompts and the shared style DNA live in
 [FLUX_PROMPTS.md](./FLUX_PROMPTS.md). Cutout assets go in
 `public/assets/`, atmosphere plates in `public/plates/`.

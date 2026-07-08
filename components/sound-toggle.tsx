@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Gloss } from "./gloss";
-import { soundPref, setSound, pluck } from "@/lib/sound";
+import { Sparkler } from "./motifs";
+import { soundPref, setSound, chime } from "@/lib/sound";
 
 export function SoundToggle() {
   const [on, setOn] = useState(false);
@@ -10,20 +11,20 @@ export function SoundToggle() {
   useEffect(() => setOn(soundPref()), []);
 
   return (
-    <Gloss gloss={on ? "oto · sound on" : "oto · sound off"} side="bottom">
+    <Gloss gloss={on ? "sound on" : "sound off"} side="bottom">
       <button
         aria-label={on ? "Mute sounds" : "Enable sounds"}
         onClick={() => {
           const next = !on;
           setOn(next);
           setSound(next);
-          if (next) pluck(2);
+          if (next) chime();
         }}
-        className={`relative font-display text-lg transition-colors ${
-          on ? "text-celadon" : "text-paper-faint hover:text-paper-dim"
+        className={`relative transition-colors ${
+          on ? "text-turmeric" : "text-paper-faint hover:text-paper-dim"
         }`}
       >
-        音
+        <Sparkler className="h-5 w-5" lit={on} />
         {!on && (
           <span className="absolute left-1/2 top-1/2 h-px w-6 -translate-x-1/2 -translate-y-1/2 -rotate-45 bg-paper-faint" />
         )}

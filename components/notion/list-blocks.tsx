@@ -15,14 +15,14 @@ export function ListBlocks({ blocks }: { blocks: any[] }) {
       bufferType === "bulleted_list_item" ? (
         <ul
           key={buffer[0].id + "-list"}
-          className="my-4 list-disc space-y-2 pl-5 marker:text-moss"
+          className="my-4 list-disc space-y-2 pl-5 marker:text-madder"
         >
           {items}
         </ul>
       ) : (
         <ol
           key={buffer[0].id + "-list"}
-          className="my-4 list-decimal space-y-2 pl-5 marker:text-moss marker:font-mono marker:text-sm"
+          className="my-4 list-decimal space-y-2 pl-5 marker:text-madder marker:font-mono marker:text-sm"
         >
           {items}
         </ol>

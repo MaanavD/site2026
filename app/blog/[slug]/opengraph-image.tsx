@@ -1,4 +1,4 @@
-import { inkCard, OG_SIZE } from "@/lib/og";
+import { dyeCard, OG_SIZE } from "@/lib/og";
 import { getPostBySlug } from "@/lib/notion";
 import { formatDate } from "@/lib/format";
 
@@ -15,11 +15,11 @@ export default async function Image({
   const { slug } = await params;
   const post = await getPostBySlug(slug);
 
-  return inkCard({
+  return dyeCard({
     title: post?.title ?? "Writing",
     kicker: [post?.category, post?.date ? formatDate(post.date) : null]
       .filter(Boolean)
       .join(" · "),
-    watermark: "筆",
+    watermark: "paisley",
   });
 }

@@ -4,6 +4,7 @@ import { formatDate } from "@/lib/format";
 import { SectionHeading } from "./section-heading";
 import { Reveal } from "./reveal";
 import { ReadStamp } from "./read-stamp";
+import { Paisley } from "./motifs";
 
 export async function Writing() {
   const posts = (await getPosts()).slice(0, 3);
@@ -11,8 +12,7 @@ export async function Writing() {
   return (
     <section className="mx-auto max-w-6xl px-6 py-28">
       <SectionHeading
-        kanji="筆"
-        gloss='fude · "the brush"'
+        motif={<Paisley className="w-full" />}
         sub="Writing"
         title="Recent meanderings"
       />
@@ -28,7 +28,7 @@ export async function Writing() {
                 <p className="font-mono text-xs text-paper-faint">
                   {formatDate(post.date)}
                   {post.category && (
-                    <span className="ml-3 text-moss">{post.category}</span>
+                    <span className="ml-3 text-turmeric">{post.category}</span>
                   )}
                 </p>
                 <h3 className="mt-2 truncate font-display text-2xl text-paper-dim transition-colors group-hover:text-paper md:text-3xl">
@@ -36,7 +36,7 @@ export async function Writing() {
                   <ReadStamp slug={post.slug} />
                 </h3>
               </div>
-              <span className="shrink-0 text-moss opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
+              <span className="shrink-0 text-madder opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
                 →
               </span>
             </TransitionLink>

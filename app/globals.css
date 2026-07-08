@@ -1,28 +1,27 @@
 @import "tailwindcss";
 
 @theme {
-  /* sumi ink scale */
-  --color-ink-950: #0a0a0c;
-  --color-ink-900: #101014;
-  --color-ink-800: #16161c;
-  --color-ink-700: #232329;
-  --color-ink-600: #35353d;
+  /* vat indigo scale ("ink" now means indigo dye) */
+  --color-ink-950: #0e1220;
+  --color-ink-900: #141b31;
+  --color-ink-800: #1c2642;
+  --color-ink-700: #2b3a63;
+  --color-ink-600: #3e4f80;
 
-  /* kinari paper */
-  --color-paper: #eae3d2;
-  --color-paper-dim: #a9a294;
-  --color-paper-faint: #6e6960;
+  /* khadi ("paper" now means unbleached khadi cloth) */
+  --color-paper: #ece2cc;
+  --color-paper-dim: #b5ac97;
+  --color-paper-faint: #8f897c;
 
-  /* forest accents (BFL green) */
-  --color-forest: #1d2b22;
-  --color-pine: #34503e;
-  --color-moss: #6f8f76;
-  --color-celadon: #a3bfa8;
+  /* natural-dye accents */
+  --color-bloom: #1c2642;
+  --color-peacock: #1f5f5b;
+  --color-madder: #8f3b2e;
+  --color-turmeric: #d9a441;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --font-display: var(--font-shippori), "Hiragino Mincho ProN", "Yu Mincho",
-    Georgia, serif;
+  --font-display: var(--font-rozha), Georgia, serif;
 
   --animate-marquee: marquee 40s linear infinite;
 
@@ -38,6 +37,9 @@
 
 :root {
   color-scheme: dark;
+  scrollbar-color: color-mix(in srgb, var(--color-madder) 70%, var(--color-ink-700))
+    var(--color-ink-950);
+  scrollbar-width: thin;
 }
 
 body {
@@ -50,7 +52,7 @@ body {
 }
 
 ::selection {
-  background: var(--color-moss);
+  background: var(--color-madder);
   color: var(--color-ink-950);
 }
 
@@ -86,12 +88,6 @@ body {
   }
 }
 
-.vertical-rl {
-  writing-mode: vertical-rl;
-  text-orientation: upright;
-  letter-spacing: 0.5em;
-}
-
 /* brush underline for links */
 .brush-link {
   position: relative;
@@ -104,7 +100,7 @@ body {
   bottom: -4px;
   height: 1px;
   width: 100%;
-  background: var(--color-moss);
+  background: var(--color-madder);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
@@ -116,24 +112,36 @@ body {
   transform-origin: left;
 }
 
-/* recognition flash when someone draws an ensō */
-@keyframes enso-burst {
+/* recognition flash when someone draws a circle: a rangoli blooms */
+@keyframes rangoli-burst {
   from {
     width: 60px;
     height: 60px;
     opacity: 0.9;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) rotate(0deg);
   }
   to {
     width: 340px;
     height: 340px;
     opacity: 0;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) rotate(40deg);
   }
 }
 
-.enso-burst {
-  animation: enso-burst 0.65s ease-out both;
+.rangoli-burst {
+  animation: rangoli-burst 0.65s ease-out both;
+}
+
+/* each ring of a courtyard rangoli blooms outward on entry */
+@keyframes rangoli-bloom {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* fog drift for the 404 path */
@@ -237,13 +245,32 @@ body {
 }
 
 /* brush drop cap on the opening paragraph */
+/* float fallback for Firefox */
 .prose-ink > p:first-of-type::first-letter {
   float: left;
-  padding-right: 0.14em;
+  padding-right: 0.1em;
+  padding-top: 0.05em;
+  margin-bottom: -0.1em;
   font-family: var(--font-display);
-  font-size: 3.1em;
-  line-height: 0.82;
-  color: var(--color-celadon);
+  font-size: 3em;
+  line-height: 1;
+  color: var(--color-turmeric);
+}
+
+/* modern initial-letter: browser handles sizing and baseline alignment */
+@supports (initial-letter: 2) or (-webkit-initial-letter: 2) {
+  .prose-ink > p:first-of-type::first-letter {
+    float: none;
+    font-size: unset;
+    line-height: unset;
+    padding-top: unset;
+    margin-bottom: unset;
+    initial-letter: 3;
+    -webkit-initial-letter: 3;
+    padding-right: 0.12em;
+    font-family: var(--font-display);
+    color: var(--color-turmeric);
+  }
 }
 
 /* prose defaults for notion content */
@@ -254,11 +281,11 @@ body {
 }
 
 .prose-ink a {
-  color: var(--color-celadon);
+  color: var(--color-turmeric);
   text-decoration: underline;
   text-decoration-color: color-mix(
     in srgb,
-    var(--color-celadon) 40%,
+    var(--color-turmeric) 40%,
     transparent
   );
   text-underline-offset: 3px;
@@ -266,5 +293,5 @@ body {
 }
 
 .prose-ink a:hover {
-  text-decoration-color: var(--color-celadon);
+  text-decoration-color: var(--color-turmeric);
 }

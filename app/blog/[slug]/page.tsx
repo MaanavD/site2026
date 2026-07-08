@@ -43,7 +43,7 @@ export default async function PostPage({
       />
 
       {post.isMock ? (
-        <p className="rounded-sm border border-celadon/25 bg-celadon/5 p-4 font-mono text-xs text-celadon">
+        <p className="rounded-sm border border-turmeric/25 bg-turmeric/5 p-4 font-mono text-xs text-turmeric">
           Preview post: set NOTION_TOKEN in .env.local to load real content.
         </p>
       ) : (

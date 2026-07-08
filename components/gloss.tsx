@@ -4,7 +4,7 @@ const positions = {
   left: "right-full top-1/2 -translate-y-1/2 mr-3",
 };
 
-// One consistent hover treatment for every kanji on the site.
+// One consistent hover treatment for every motif and mark on the site.
 export function Gloss({
   gloss,
   children,

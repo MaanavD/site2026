@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { TransitionLink, useInkTransition } from "./ink-transition";
 import { Gloss } from "./gloss";
+import { Paisley } from "./motifs";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -17,7 +18,7 @@ export function PostHeader({
   category: string | null;
 }) {
   const { morphText, morphDone, registerMorphTarget } = useInkTransition();
-  // latch at mount: once a morph landing, always a morph landing — when the
+  // latch at mount: once a morph landing, always a morph landing, when the
   // morph settles and morphText clears, the title must NOT replay the whisk
   const [isMorph] = useState(() => morphText === title);
   const h1 = useRef<HTMLHeadingElement>(null);
@@ -74,7 +75,7 @@ export function PostHeader({
         className="mt-8 font-mono text-xs text-paper-faint"
       >
         {date}
-        {category && <span className="ml-3 text-moss">{category}</span>}
+        {category && <span className="ml-3 text-turmeric">{category}</span>}
       </motion.p>
 
       {isMorph ? (
@@ -120,19 +121,18 @@ export function PostHeader({
         className="mt-8 flex items-center gap-4 text-paper-faint"
       >
         <motion.span
-          className="h-px w-16 origin-left bg-moss/60"
+          className="h-px w-16 origin-left bg-madder/60"
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ duration: 0.8, delay: 0.9, ease }}
         />
-        <Gloss gloss="fude · the writing brush" side="top">
+        <Gloss gloss="one paisley per post" side="top">
           <motion.span
-            className="font-display"
             initial={{ opacity: 0, rotate: -20 }}
             animate={{ opacity: 1, rotate: 0 }}
             transition={{ duration: 0.6, delay: 1.1, ease }}
           >
-            筆
+            <Paisley className="h-5 w-5" />
           </motion.span>
         </Gloss>
       </div>

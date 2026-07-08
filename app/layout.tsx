@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Shippori_Mincho } from "next/font/google";
+import { Geist, Geist_Mono, Rozha_One } from "next/font/google";
 import "./globals.css";
 import { InkTransition } from "@/components/ink-transition";
 import { EnsoListener } from "@/components/enso-listener";
@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const shippori = Shippori_Mincho({
-  variable: "--font-shippori",
-  weight: ["500", "600", "700"],
+const rozha = Rozha_One({
+  variable: "--font-rozha",
+  weight: "400",
   subsets: ["latin"],
 });
 
@@ -40,7 +40,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${shippori.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${rozha.variable} h-full antialiased`}
     >
       <body className="grain min-h-full flex flex-col">
         <InkTransition>

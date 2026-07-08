@@ -6,8 +6,8 @@ import { useInkTransition } from "./ink-transition";
 
 type Pt = { x: number; y: number; t: number };
 
-// Invisible: watches the native cursor for a drawn circle (ensō).
-// A recognized circle flashes a ring and opens the garden.
+// Invisible: watches the native cursor for a drawn circle.
+// A recognized circle blooms a rangoli and opens the courtyard.
 export function EnsoListener() {
   const { navigate } = useInkTransition();
   const pathname = usePathname();
@@ -75,9 +75,12 @@ export function EnsoListener() {
     <span
       key={burst.k}
       aria-hidden
-      className="enso-burst pointer-events-none fixed z-[150] rounded-full border-2 border-celadon"
+      className="rangoli-burst pointer-events-none fixed z-[150] rounded-full border-2 border-turmeric"
       style={{ left: burst.x, top: burst.y }}
       onAnimationEnd={() => setBurst(null)}
-    />
+    >
+      <span className="absolute inset-[12%] rounded-full border-2 border-dotted border-madder" />
+      <span className="absolute inset-[30%] rounded-full border border-turmeric/70" />
+    </span>
   );
 }
