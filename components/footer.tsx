@@ -24,9 +24,9 @@ export async function Footer() {
         </div>
         <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="flex items-baseline gap-3 font-display text-3xl text-paper md:text-4xl">
+            <p className="flex items-center gap-3 font-display text-3xl text-paper md:text-4xl">
               <Gloss gloss="a lotus, carved like a stamp" side="top">
-                <LotusSeal className="h-7 w-7 self-center text-madder" />
+                <LotusSeal className="h-7 w-7 shrink-0 text-madder md:h-8 md:w-8" />
               </Gloss>
               <span>made by hand, block by block</span>
             </p>

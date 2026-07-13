@@ -1,15 +1,21 @@
 import type { Metadata } from "next";
 import {
+  Barbell,
   Buti,
+  CoffeeCup,
+  Fist,
   Flame,
   Kite,
   LotusOutline,
   LotusSeal,
   Marigold,
+  Mountains,
   Paisley,
   PeacockFeather,
   RiverLines,
+  Skier,
   Sparkler,
+  TennisBall,
   TreeOfLife,
 } from "@/components/motifs";
 
@@ -30,6 +36,12 @@ const MOTIFS = [
   ["Paisley", Paisley],
   ["Buti", Buti],
   ["Sparkler", Sparkler],
+  ["CoffeeCup", CoffeeCup],
+  ["Barbell", Barbell],
+  ["Mountains", Mountains],
+  ["Skier", Skier],
+  ["Fist", Fist],
+  ["TennisBall", TennisBall],
 ] as const;
 
 export default function MotifSheet() {

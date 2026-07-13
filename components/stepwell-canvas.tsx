@@ -327,6 +327,59 @@ const fragmentShader = /* glsl */ `
     }
     col += flyCol * flies * flyAmt * 0.85;
 
+    // ---- the leap: every little while one ember jumps from the tiers
+    // for the sun, holds it a breath, and comes back down. somebody here
+    // once mistook it for a mango; the habit stuck.
+    {
+      float cycle = 13.0;
+      float ph = fract(t / cycle);
+      float id = floor(t / cycle);
+      float lx = 0.25 + 0.5 * hash(vec2(id, 21.7));
+      float ground = tierSurf(lx, 5.0, 2.0, -0.55, 0.78, 0.35, rise);
+      vec2 a = vec2(lx * aspect, max(ground, 0.05) + 0.015);
+      vec2 sunPix = vec2(sunPos.x * aspect, sunPos.y + rise * 0.35);
+      vec2 b = sunPix - vec2(0.0, sunR + 0.015);
+      vec2 land = vec2(
+        a.x + 0.18 * aspect * (hash(vec2(id, 3.3)) - 0.5), a.y);
+
+      float emb = 0.0;
+      vec2 pos = a;
+      vec2 tail = a;
+      if (ph > 0.62 && ph < 0.995) {
+        vec2 cpt = mix(a, b, 0.5) + vec2(0.0, 0.30);
+        if (ph < 0.78) {
+          float k = (ph - 0.62) / 0.16;
+          k = k * k * (3.0 - 2.0 * k);
+          float k2 = max(0.0, k - 0.07);
+          pos = mix(mix(a, cpt, k), mix(cpt, b, k), k);
+          tail = mix(mix(a, cpt, k2), mix(cpt, b, k2), k2);
+          emb = 1.0;
+        } else if (ph < 0.82) {
+          pos = b;
+          tail = b;
+          // the touch: a small flare against the sun's cheek
+          emb = 1.0 + 1.6 * sin((ph - 0.78) / 0.04 * 3.1416);
+        } else if (ph < 0.94) {
+          float k = (ph - 0.82) / 0.12;
+          pos = vec2(mix(b.x, land.x, k), mix(b.y, land.y, k * k));
+          float kt = max(0.0, k - 0.06);
+          tail = vec2(mix(b.x, land.x, kt), mix(b.y, land.y, kt * kt));
+          emb = 1.0 - 0.35 * k;
+        } else {
+          pos = land;
+          tail = land;
+          // cooling where it fell, among the diyas
+          emb = (1.0 - (ph - 0.94) / 0.055) * 0.65;
+        }
+        float ed = distance(vec2(uv.x * aspect, uv.y), pos);
+        float td = distance(vec2(uv.x * aspect, uv.y), tail);
+        float glow = exp(-ed * 220.0) * 1.2 + exp(-ed * 40.0) * 0.10
+          + exp(-td * 240.0) * 0.35;
+        col += mix(vec3(0.85, 0.60, 0.24), sunCol, 0.35)
+          * glow * emb * sunFade;
+      }
+    }
+
     // ---- pointer glow: turmeric caught in the dye
     col += vec3(0.85, 0.64, 0.25) * md * smoothstep(0.5, 0.95, f) * 0.28;
     col += vec3(0.36, 0.26, 0.12) * md * md * 0.15;

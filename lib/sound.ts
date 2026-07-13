@@ -197,6 +197,33 @@ function stampNow(c: AudioContext) {
   pluck(0, 0.04);
 }
 
+// a lighter touch of the same block: fingertips testing the carve,
+// for hovering the pursuit blocks (no string under it, no knock)
+export function press() {
+  if (!enabled) return;
+  whenRunning((c) => {
+    const t = c.currentTime;
+    const n = Math.floor(c.sampleRate * 0.09);
+    const buf = c.createBuffer(1, n, c.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) {
+      const env = Math.pow(1 - i / n, 2.6);
+      d[i] = (Math.random() * 2 - 1) * env;
+    }
+    const noise = c.createBufferSource();
+    noise.buffer = buf;
+    const bp = c.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 480;
+    bp.Q.value = 0.9;
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.05, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+    noise.connect(bp).connect(g).connect(ensureBus(c));
+    noise.start(t);
+  });
+}
+
 // wind that follows the pointer across the hero (kept dry: it's the room)
 let wind: { gain: GainNode; filter: BiquadFilterNode } | null = null;
 

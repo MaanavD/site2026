@@ -4,7 +4,7 @@ import { getPosts } from "@/lib/notion";
 import { formatDate } from "@/lib/format";
 import { Reveal } from "@/components/reveal";
 import { ReadStamp } from "@/components/read-stamp";
-import { Paisley } from "@/components/motifs";
+import { RiverLines } from "@/components/motifs";
 
 export const revalidate = 3600;
 
@@ -39,7 +39,7 @@ export default async function BlogPage() {
         aria-hidden
         className="pointer-events-none absolute -top-4 right-0 w-52 select-none text-paper/5"
       >
-        <Paisley className="w-full" />
+        <RiverLines className="w-full" />
       </span>
       <Reveal>
         <p className="font-mono text-xs uppercase tracking-[0.35em] text-turmeric">
@@ -49,8 +49,8 @@ export default async function BlogPage() {
           Meanderings
         </h1>
         <p className="mt-5 max-w-md text-paper-dim">
-          Notes on life, AI, and everything in between. Written in Notion,
-          printed here by hand (well, by shader).
+          Notes on life, AI, and everything in between. They wander a bit on
+          the way (rivers get there anyway).
         </p>
       </Reveal>
 

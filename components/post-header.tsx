@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { TransitionLink, useInkTransition } from "./ink-transition";
 import { Gloss } from "./gloss";
-import { Paisley } from "./motifs";
+import { RiverLines } from "./motifs";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -126,13 +126,13 @@ export function PostHeader({
           animate={{ scaleX: 1 }}
           transition={{ duration: 0.8, delay: 0.9, ease }}
         />
-        <Gloss gloss="one paisley per post" side="top">
+        <Gloss gloss="writing meanders. rivers agree." side="top">
           <motion.span
-            initial={{ opacity: 0, rotate: -20 }}
-            animate={{ opacity: 1, rotate: 0 }}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 1.1, ease }}
           >
-            <Paisley className="h-5 w-5" />
+            <RiverLines className="h-5 w-5" />
           </motion.span>
         </Gloss>
       </div>

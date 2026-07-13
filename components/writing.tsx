@@ -4,7 +4,7 @@ import { formatDate } from "@/lib/format";
 import { SectionHeading } from "./section-heading";
 import { Reveal } from "./reveal";
 import { ReadStamp } from "./read-stamp";
-import { Paisley } from "./motifs";
+import { RiverLines } from "./motifs";
 
 export async function Writing() {
   const posts = (await getPosts()).slice(0, 3);
@@ -12,7 +12,7 @@ export async function Writing() {
   return (
     <section className="mx-auto max-w-6xl px-6 py-28">
       <SectionHeading
-        motif={<Paisley className="w-full" />}
+        motif={<RiverLines className="w-full" />}
         sub="Writing"
         title="Recent meanderings"
       />

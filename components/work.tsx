@@ -3,6 +3,10 @@
 import { motion } from "motion/react";
 import { SectionHeading } from "./section-heading";
 import { Buti, Flame, Kite, LotusOutline, RiverLines } from "./motifs";
+import { pluck } from "@/lib/sound";
+
+// one quiet ascending note per card, Sa Ga Pa Sa'
+const CARD_NOTES = [0, 2, 3, 5];
 
 const projects = [
   {
@@ -58,6 +62,7 @@ export function Work() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.7, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+            onMouseEnter={() => pluck(CARD_NOTES[i % CARD_NOTES.length], 0.035)}
             className="group relative overflow-hidden bg-ink-900 p-8 md:p-10"
           >
             {/* ink sweep on hover */}

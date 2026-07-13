@@ -5,6 +5,7 @@ import Image from "next/image";
 import Text from "./text";
 import { ListBlocks } from "./list-blocks";
 import { Gloss } from "../gloss";
+import { Marigold } from "../motifs";
 
 const TodoCheckbox = ({
   id,
@@ -115,20 +116,31 @@ export default function Block({ block }: { block: any }) {
       const caption = value.caption?.[0]?.plain_text ?? "";
       if (!src) return null;
       return (
-        <figure className="my-10">
-          <div className="relative overflow-hidden rounded-sm border border-paper/10">
-            <Image
-              src={src}
-              alt={caption || "Blog image"}
-              width={1200}
-              height={800}
-              className="w-full object-cover"
-              sizes="(max-width: 768px) 100vw, 720px"
+        <figure className="my-12">
+          {/* printed like a plate: the registration border sits a hair off,
+              the way a second pass of the block never lands exactly */}
+          <div className="relative">
+            <span
+              aria-hidden
+              className="absolute -left-2 -top-2 h-full w-full rounded-sm border border-madder/35"
             />
+            <div className="relative overflow-hidden rounded-sm border border-paper/10">
+              <Image
+                src={src}
+                alt={caption || "Blog image"}
+                width={1200}
+                height={800}
+                className="w-full object-cover"
+                sizes="(max-width: 768px) 100vw, 720px"
+              />
+              <span className="pointer-events-none absolute inset-0 bg-madder/5 mix-blend-overlay" />
+            </div>
           </div>
           {caption && (
-            <figcaption className="mt-3 text-center font-mono text-xs text-paper-faint">
+            <figcaption className="mt-4 flex items-center justify-center gap-2 font-mono text-xs text-paper-faint">
+              <span aria-hidden className="h-px w-6 bg-madder/40" />
               {caption}
+              <span aria-hidden className="h-px w-6 bg-madder/40" />
             </figcaption>
           )}
         </figure>
@@ -141,15 +153,21 @@ export default function Block({ block }: { block: any }) {
           className="my-12 flex items-center justify-center gap-4 text-paper-faint"
         >
           <span className="h-px w-16 bg-paper/15" />
-          <Gloss gloss="ensō · the zen circle" side="top">
-            <span className="font-display text-madder/70">◯</span>
+          <Gloss gloss="a marigold, between thoughts" side="top">
+            <Marigold className="h-4 w-4 text-turmeric/70" />
           </Gloss>
           <span className="h-px w-16 bg-paper/15" />
         </div>
       );
     case "quote":
       return (
-        <blockquote className="my-8 border-l-2 border-madder py-1 pl-6 font-display text-xl leading-relaxed text-paper/90 italic">
+        <blockquote className="relative my-10 rounded-sm border border-paper/8 border-l-2 border-l-madder bg-ink-900/70 py-5 pl-7 pr-6 font-display text-xl leading-relaxed text-paper/90 italic">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-1 left-2 font-display text-5xl not-italic leading-none text-madder/25"
+          >
+            &ldquo;
+          </span>
           <Text text={value.rich_text} />
         </blockquote>
       );
@@ -160,10 +178,11 @@ export default function Block({ block }: { block: any }) {
             <span className="font-mono text-xs text-paper-faint">
               {value.language ?? "code"}
             </span>
-            <span className="flex gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-paper/15" />
-              <span className="h-2 w-2 rounded-full bg-paper/15" />
-              <span className="h-2 w-2 rounded-full bg-madder/60" />
+            <span className="flex gap-1.5" aria-hidden>
+              {/* three dye pots: peacock, turmeric, madder */}
+              <span className="h-2 w-2 rounded-full bg-peacock/70" />
+              <span className="h-2 w-2 rounded-full bg-turmeric/70" />
+              <span className="h-2 w-2 rounded-full bg-madder/70" />
             </span>
           </div>
           <pre className="overflow-x-auto bg-ink-900 p-5">

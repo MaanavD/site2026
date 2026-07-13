@@ -4,7 +4,6 @@ import { useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, useScroll, useTransform } from "motion/react";
 import { Gloss } from "./gloss";
-import { TreeOfLife } from "./motifs";
 import { useWind } from "./use-wind";
 
 const StepwellCanvas = dynamic(() => import("./stepwell-canvas"), {
@@ -31,16 +30,6 @@ export function Hero() {
       className="relative flex h-svh min-h-[640px] items-center overflow-hidden"
     >
       <StepwellCanvas descend={scrollYProgress} />
-
-        {/* a small printed forest, a nod to the Black Forest */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -right-16 top-1/2 flex -translate-y-1/2 select-none items-end text-paper/4"
-        >
-          <TreeOfLife className="w-56 md:w-72" />
-          <TreeOfLife className="-ml-16 w-72 md:w-96" />
-          <TreeOfLife className="-ml-16 w-52 md:w-64" />
-        </span>
 
         <Gloss
           gloss="where I work, printed where I live"
