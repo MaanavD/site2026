@@ -1,94 +1,136 @@
-"use client";
-
-import React, { useState } from "react";
 import Image from "next/image";
+import type { NotionBlock } from "@/lib/notion/types";
 import Text from "./text";
 import { ListBlocks } from "./list-blocks";
+import { TodoCheckbox } from "./todo-checkbox";
 import { Gloss } from "../gloss";
 import { Marigold } from "../motifs";
 
-const TodoCheckbox = ({
-  id,
-  initialChecked,
-  children,
-}: {
-  id: string;
-  initialChecked: boolean;
-  children: React.ReactNode;
-}) => {
-  const [isChecked, setIsChecked] = useState(initialChecked);
+type MediaValue =
+  | { type: "external"; external: { url: string } }
+  | { type: "file"; file: { url: string } };
 
-  return (
-    <div className="my-2 flex items-start gap-3">
-      <input
-        type="checkbox"
-        id={id}
-        checked={isChecked}
-        onChange={() => setIsChecked(!isChecked)}
-        className="mt-1.5 h-4 w-4 appearance-none rounded-sm border border-paper/30 bg-transparent transition-colors checked:border-madder checked:bg-madder"
-      />
-      <div className={isChecked ? "text-paper-faint line-through" : ""}>
-        {children}
-      </div>
-    </div>
-  );
-};
+const mediaUrl = (value: MediaValue) =>
+  value.type === "external" ? value.external.url : value.file.url;
 
-const mediaUrl = (value: any) =>
-  value?.type === "external"
-    ? value.external?.url
-    : value?.type === "file"
-      ? value.file?.url
+const plainText = (text: { plain_text: string }[]) =>
+  text.map((item) => item.plain_text).join("").trim();
+
+function safeExternalUrl(value: string): string | null {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:"
+      ? url.toString()
       : null;
+  } catch {
+    return null;
+  }
+}
 
-export default function Block({ block }: { block: any }) {
-  const { type, id } = block;
-  const value = block[type];
+function videoEmbedUrl(value: string): string | null {
+  const safeUrl = safeExternalUrl(value);
+  if (!safeUrl) return null;
+  const url = new URL(safeUrl);
 
-  switch (type) {
+  if (url.hostname === "youtu.be") {
+    const id = url.pathname.slice(1).split("/")[0];
+    return id ? `https://www.youtube.com/embed/${id}` : null;
+  }
+
+  if (url.hostname.endsWith("youtube.com")) {
+    const id =
+      url.searchParams.get("v") ??
+      url.pathname.match(/^\/(?:embed|shorts)\/([^/]+)/)?.[1];
+    return id ? `https://www.youtube.com/embed/${id}` : null;
+  }
+
+  if (url.hostname === "vimeo.com" || url.hostname === "www.vimeo.com") {
+    const id = url.pathname.match(/^\/(\d+)/)?.[1];
+    return id ? `https://player.vimeo.com/video/${id}` : null;
+  }
+
+  if (url.hostname === "player.vimeo.com") return safeUrl;
+  return null;
+}
+
+export type PostSlugMap = Readonly<Record<string, string>>;
+
+export default function Block({
+  block,
+  postSlugsById = {},
+}: {
+  block: NotionBlock;
+  postSlugsById?: PostSlugMap;
+}) {
+  switch (block.type) {
     case "paragraph":
+      if (!block.children?.length) {
+        return (
+          <p className="my-5">
+            <Text text={block.paragraph.rich_text} />
+          </p>
+        );
+      }
       return (
-        <p className="my-5">
-          <Text text={value.rich_text} />
-        </p>
+        <div className="my-5">
+          <p>
+            <Text text={block.paragraph.rich_text} />
+          </p>
+          <div className="pl-4">
+            <ListBlocks blocks={block.children} postSlugsById={postSlugsById} />
+          </div>
+        </div>
       );
     case "heading_1":
       return (
         <h2 className="mt-14 mb-5 border-l-2 border-madder pl-4 font-display text-3xl text-paper">
-          <Text text={value.rich_text} />
+          <Text text={block.heading_1.rich_text} />
         </h2>
       );
     case "heading_2":
       return (
         <h3 className="mt-10 mb-4 font-display text-2xl text-paper">
-          <Text text={value.rich_text} />
+          <Text text={block.heading_2.rich_text} />
         </h3>
       );
     case "heading_3":
       return (
         <h4 className="mt-8 mb-3 font-display text-xl text-paper">
-          <Text text={value.rich_text} />
+          <Text text={block.heading_3.rich_text} />
         </h4>
       );
     case "bulleted_list_item":
+      return (
+        <li className="pl-1">
+          <Text text={block.bulleted_list_item.rich_text} />
+          {!!block.children?.length && (
+            <div className="pl-4">
+              <ListBlocks blocks={block.children} postSlugsById={postSlugsById} />
+            </div>
+          )}
+        </li>
+      );
     case "numbered_list_item":
       return (
         <li className="pl-1">
-          <Text text={value.rich_text} />
-          {!!value.children?.length && (
+          <Text text={block.numbered_list_item.rich_text} />
+          {!!block.children?.length && (
             <div className="pl-4">
-              <ListBlocks blocks={value.children} />
+              <ListBlocks blocks={block.children} postSlugsById={postSlugsById} />
             </div>
           )}
         </li>
       );
     case "to_do":
       return (
-        <TodoCheckbox id={id} initialChecked={value.checked}>
-          <Text text={value.rich_text} />
-          {!!value.children?.length && (
-            <div className="mt-2 pl-4">
-              <ListBlocks blocks={value.children} />
+        <TodoCheckbox
+          id={block.id}
+          initialChecked={block.to_do.checked}
+          label={<Text text={block.to_do.rich_text} />}
+        >
+          {!!block.children?.length && (
+            <div className="mt-2 pl-8">
+              <ListBlocks blocks={block.children} postSlugsById={postSlugsById} />
             </div>
           )}
         </TodoCheckbox>
@@ -100,25 +142,33 @@ export default function Block({ block }: { block: any }) {
             <span className="mr-2 inline-block text-madder transition-transform duration-200 group-open:rotate-90">
               ▸
             </span>
-            <Text text={value.rich_text} />
+            <Text text={block.toggle.rich_text} />
           </summary>
-          {!!value.children && (
+          {!!block.children?.length && (
             <div className="mt-3 border-t border-paper/8 pt-3 pl-4">
-              <ListBlocks blocks={value.children} />
+              <ListBlocks blocks={block.children} postSlugsById={postSlugsById} />
             </div>
           )}
         </details>
       );
-    case "child_page":
-      return <p className="text-paper-faint">{value.title}</p>;
+    case "child_page": {
+      const slug = postSlugsById[block.id];
+      return slug ? (
+        <a
+          href={`/blog/${slug}`}
+          className="my-4 block text-turmeric underline underline-offset-4 hover:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
+        >
+          {block.child_page.title}
+        </a>
+      ) : (
+        <p className="text-paper-faint">{block.child_page.title}</p>
+      );
+    }
     case "image": {
-      const src = mediaUrl(value);
-      const caption = value.caption?.[0]?.plain_text ?? "";
-      if (!src) return null;
+      const src = mediaUrl(block.image);
+      const caption = plainText(block.image.caption);
       return (
         <figure className="my-12">
-          {/* printed like a plate: the registration border sits a hair off,
-              the way a second pass of the block never lands exactly */}
           <div className="relative">
             <span
               aria-hidden
@@ -127,7 +177,7 @@ export default function Block({ block }: { block: any }) {
             <div className="relative overflow-hidden rounded-sm border border-paper/10">
               <Image
                 src={src}
-                alt={caption || "Blog image"}
+                alt={caption}
                 width={1200}
                 height={800}
                 className="w-full object-cover"
@@ -139,7 +189,7 @@ export default function Block({ block }: { block: any }) {
           {caption && (
             <figcaption className="mt-4 flex items-center justify-center gap-2 font-mono text-xs text-paper-faint">
               <span aria-hidden className="h-px w-6 bg-madder/40" />
-              {caption}
+              <Text text={block.image.caption} />
               <span aria-hidden className="h-px w-6 bg-madder/40" />
             </figcaption>
           )}
@@ -168,7 +218,7 @@ export default function Block({ block }: { block: any }) {
           >
             &ldquo;
           </span>
-          <Text text={value.rich_text} />
+          <Text text={block.quote.rich_text} />
         </blockquote>
       );
     case "code":
@@ -176,10 +226,9 @@ export default function Block({ block }: { block: any }) {
         <div className="my-8 overflow-hidden rounded-sm border border-paper/10">
           <div className="flex items-center justify-between border-b border-paper/8 bg-ink-800 px-4 py-2">
             <span className="font-mono text-xs text-paper-faint">
-              {value.language ?? "code"}
+              {block.code.language ?? "code"}
             </span>
             <span className="flex gap-1.5" aria-hidden>
-              {/* three dye pots: peacock, turmeric, madder */}
               <span className="h-2 w-2 rounded-full bg-peacock/70" />
               <span className="h-2 w-2 rounded-full bg-turmeric/70" />
               <span className="h-2 w-2 rounded-full bg-madder/70" />
@@ -187,64 +236,79 @@ export default function Block({ block }: { block: any }) {
           </div>
           <pre className="overflow-x-auto bg-ink-900 p-5">
             <code className="font-mono text-sm leading-relaxed text-paper/85">
-              <Text text={value.rich_text} />
+              <Text text={block.code.rich_text} />
             </code>
           </pre>
         </div>
       );
-    case "file": {
-      const fileUrl = mediaUrl(value);
-      const fileText = value.caption?.[0]?.plain_text || "Download file";
-      if (!fileUrl) return null;
+    case "file":
       return (
         <a
-          href={fileUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="my-4 flex items-center gap-2 text-turmeric underline underline-offset-4 hover:text-paper"
+          href={mediaUrl(block.file)}
+          className="my-4 flex items-center gap-2 text-turmeric underline underline-offset-4 hover:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
         >
-          {fileText} ↓
+          {block.file.caption.length ? (
+            <Text text={block.file.caption} />
+          ) : (
+            block.file.name || "Download file"
+          )}{" "}
+          ↓
         </a>
       );
-    }
-    case "bookmark":
-    case "link_preview":
+    case "bookmark": {
+      const url = safeExternalUrl(block.bookmark.url);
+      if (!url) return null;
       return (
         <a
-          href={value.url}
+          href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="group my-6 block rounded-sm border border-paper/10 bg-ink-900 p-4 transition-colors hover:border-madder/50"
+          className="group my-6 block rounded-sm border border-paper/10 bg-ink-900 p-4 transition-colors hover:border-madder/50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
         >
-          <div className="truncate font-mono text-sm text-turmeric">
-            {value.url}
-          </div>
-          {value.caption && (
+          <div className="truncate font-mono text-sm text-turmeric">{url}</div>
+          {!!block.bookmark.caption.length && (
             <div className="mt-1 text-sm text-paper-faint">
-              <Text text={value.caption} />
+              <Text text={block.bookmark.caption} />
             </div>
           )}
         </a>
       );
+    }
+    case "link_preview": {
+      const url = safeExternalUrl(block.link_preview.url);
+      if (!url) return null;
+      return (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group my-6 block rounded-sm border border-paper/10 bg-ink-900 p-4 transition-colors hover:border-madder/50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
+        >
+          <div className="truncate font-mono text-sm text-turmeric">{url}</div>
+        </a>
+      );
+    }
     case "callout": {
-      const icon =
-        value.icon?.emoji ||
-        value.icon?.file?.url ||
-        value.icon?.external?.url ||
-        "🪔";
+      const icon = block.callout.icon;
+      const iconText =
+        icon?.type === "emoji"
+          ? icon.emoji
+          : icon?.type === "file" || icon?.type === "external"
+            ? "◦"
+            : "🪔";
       return (
         <aside className="my-8 flex gap-4 rounded-sm border border-turmeric/25 bg-turmeric/5 p-5">
           <span
             aria-hidden
             className="shrink-0 font-display text-xl text-turmeric"
           >
-            {typeof icon === "string" && icon.startsWith("http") ? "◦" : icon}
+            {iconText}
           </span>
           <div className="min-w-0 whitespace-pre-line text-paper/85">
-            <Text text={value.rich_text} />
-            {!!value.children?.length && (
+            <Text text={block.callout.rich_text} />
+            {!!block.children?.length && (
               <div className="mt-3">
-                <ListBlocks blocks={value.children} />
+                <ListBlocks blocks={block.children} postSlugsById={postSlugsById} />
               </div>
             )}
           </div>
@@ -254,43 +318,55 @@ export default function Block({ block }: { block: any }) {
     case "column_list":
       return (
         <div className="my-6 flex flex-col gap-6 md:flex-row">
-          {!!value.children && <ListBlocks blocks={value.children} />}
+          {!!block.children?.length && <ListBlocks blocks={block.children} postSlugsById={postSlugsById} />}
         </div>
       );
     case "column":
       return (
         <div className="min-w-0 flex-1">
-          {!!value.children && <ListBlocks blocks={value.children} />}
+          {!!block.children?.length && <ListBlocks blocks={block.children} postSlugsById={postSlugsById} />}
         </div>
       );
     case "table":
       return (
         <div className="my-8 overflow-x-auto rounded-sm border border-paper/10">
           <table className="w-full border-collapse text-sm">
-            {!!value.children && (
+            {!!block.children?.length && (
               <tbody>
-                {value.children.map((row: any, rowIndex: number) => {
+                {block.children.map((row, rowIndex) => {
                   if (row.type !== "table_row") return null;
-                  const cells = row.table_row?.cells || [];
-                  const isHeader = rowIndex === 0 && value.has_column_header;
-                  const CellTag = isHeader ? "th" : "td";
                   return (
                     <tr
-                      key={row.id || rowIndex}
+                      key={row.id}
                       className="border-b border-paper/8 last:border-0"
                     >
-                      {cells.map((cell: any[], cellIndex: number) => (
-                        <CellTag
-                          key={cellIndex}
-                          className={`p-3 text-left ${
-                            isHeader
-                              ? "bg-ink-800 font-display text-paper"
-                              : "text-paper/80"
-                          }`}
-                        >
-                          <Text text={cell} />
-                        </CellTag>
-                      ))}
+                      {row.table_row.cells.map((cell, cellIndex) => {
+                        const isColumnHeader =
+                          rowIndex === 0 && block.table.has_column_header;
+                        const isRowHeader =
+                          cellIndex === 0 && block.table.has_row_header;
+                        const CellTag =
+                          isColumnHeader || isRowHeader ? "th" : "td";
+                        const scope = isColumnHeader
+                          ? "col"
+                          : isRowHeader
+                            ? "row"
+                            : undefined;
+
+                        return (
+                          <CellTag
+                            key={cellIndex}
+                            scope={scope}
+                            className={`p-3 text-left ${
+                              isColumnHeader || isRowHeader
+                                ? "bg-ink-800 font-display text-paper"
+                                : "text-paper/80"
+                            }`}
+                          >
+                            <Text text={cell} />
+                          </CellTag>
+                        );
+                      })}
                     </tr>
                   );
                 })}
@@ -300,68 +376,74 @@ export default function Block({ block }: { block: any }) {
         </div>
       );
     case "video": {
-      const videoUrl = mediaUrl(value);
-      if (!videoUrl) return null;
-
-      const youtubeMatch = videoUrl.match(
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/
-      );
-      if (youtubeMatch || videoUrl.includes("vimeo.com")) {
-        const embedUrl = youtubeMatch
-          ? `https://www.youtube.com/embed/${youtubeMatch[1]}`
-          : videoUrl;
-        return (
-          <div className="my-10 aspect-video w-full overflow-hidden rounded-sm border border-paper/10">
-            <iframe
-              src={embedUrl}
-              title="Embedded video"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="h-full w-full"
-            />
-          </div>
-        );
-      }
+      const videoUrl = mediaUrl(block.video);
+      const embedUrl = videoEmbedUrl(videoUrl);
+      const caption = plainText(block.video.caption);
       return (
-        <video
-          controls
-          className="my-10 w-full rounded-sm border border-paper/10"
-        >
-          <source src={videoUrl} />
-        </video>
+        <figure className="my-10">
+          {embedUrl ? (
+            <div className="aspect-video w-full overflow-hidden rounded-sm border border-paper/10">
+              <iframe
+                src={embedUrl}
+                title={caption || "Video embedded in this article"}
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="h-full w-full"
+              />
+            </div>
+          ) : (
+            <video
+              controls
+              preload="metadata"
+              className="w-full rounded-sm border border-paper/10"
+            >
+              <source src={videoUrl} />
+              <a href={videoUrl}>Download the video</a>
+            </video>
+          )}
+          {block.video.caption.length > 0 && (
+            <figcaption className="mt-3 text-center font-mono text-xs text-paper-faint">
+              <Text text={block.video.caption} />
+            </figcaption>
+          )}
+        </figure>
       );
     }
-    case "embed":
+    case "embed": {
+      const url = safeExternalUrl(block.embed.url);
+      if (!url) return null;
       return (
         <div className="my-8">
           <iframe
-            src={value.url}
-            title="Embedded content"
+            src={url}
+            title={`Embedded content from ${new URL(url).hostname}`}
+            loading="lazy"
             className="min-h-[300px] w-full rounded-sm border border-paper/10"
-            sandbox="allow-scripts allow-same-origin"
+            sandbox="allow-forms allow-popups allow-scripts"
           />
         </div>
       );
+    }
     case "link_to_page": {
-      const pageUrl =
-        value.type === "page_id" && value.page_id
-          ? `/blog/${value.page_id}`
-          : "/blog";
+      const pageId =
+        block.link_to_page.type === "page_id"
+          ? block.link_to_page.page_id
+          : null;
+      const slug = pageId ? postSlugsById[pageId] : null;
       return (
         <a
-          href={pageUrl}
-          className="my-4 block text-turmeric underline underline-offset-4 hover:text-paper"
+          href={slug ? `/blog/${slug}` : "/blog"}
+          className="my-4 block text-turmeric underline underline-offset-4 hover:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
         >
-          → Linked page
+          → {slug ? "Read the linked post" : "Browse the writing archive"}
         </a>
       );
     }
-    case "pdf": {
-      const pdfUrl = mediaUrl(value);
-      if (!pdfUrl) return null;
+    case "pdf":
       return (
         <a
-          href={pdfUrl}
+          href={mediaUrl(block.pdf)}
           target="_blank"
           rel="noopener noreferrer"
           className="my-4 flex items-center gap-2 text-turmeric underline underline-offset-4 hover:text-paper"
@@ -369,22 +451,33 @@ export default function Block({ block }: { block: any }) {
           Open PDF ↗
         </a>
       );
-    }
     case "audio": {
-      const audioUrl = mediaUrl(value);
-      if (!audioUrl) return null;
+      const audioUrl = mediaUrl(block.audio);
       return (
-        <audio controls className="my-6 w-full">
-          <source src={audioUrl} />
-        </audio>
+        <figure className="my-6">
+          <audio controls preload="metadata" className="w-full">
+            <source src={audioUrl} />
+            <a href={audioUrl}>Download the audio</a>
+          </audio>
+          {block.audio.caption.length > 0 && (
+            <figcaption className="mt-2 text-center font-mono text-xs text-paper-faint">
+              <Text text={block.audio.caption} />
+            </figcaption>
+          )}
+        </figure>
       );
     }
     case "equation":
       return (
         <div className="my-6 overflow-x-auto rounded-sm bg-ink-800 p-5 text-center font-mono text-lg text-paper/85">
-          {value.expression}
+          {block.equation.expression}
         </div>
       );
+    case "synced_block":
+    case "template":
+      return block.children?.length ? (
+        <ListBlocks blocks={block.children} postSlugsById={postSlugsById} />
+      ) : null;
     case "breadcrumb":
     case "table_of_contents":
       return null;

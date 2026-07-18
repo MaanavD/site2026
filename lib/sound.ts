@@ -1,36 +1,9 @@
+import { whenAudioRunning } from "./audio-context";
+import { soundPref } from "./sound-preference";
+
 // Synthesized santoor via Karplus-Strong, played in Raag Bhupali,
 // with a shared reverb so everything sits in the same quiet room.
 // No audio files. Muted by default; the visitor opts in via the nav toggle.
-
-let ctx: AudioContext | null = null;
-let enabled = false;
-
-export function soundPref() {
-  if (typeof window === "undefined") return false;
-  enabled = localStorage.getItem("sound") === "on";
-  return enabled;
-}
-
-export function setSound(on: boolean) {
-  enabled = on;
-  localStorage.setItem("sound", on ? "on" : "off");
-  if (on) ensureCtx();
-  else stopWind();
-}
-
-function ensureCtx() {
-  if (!ctx) ctx = new AudioContext();
-  if (ctx.state === "suspended") ctx.resume();
-  return ctx;
-}
-
-// browsers suspend idle AudioContexts; notes scheduled while suspended are
-// silently dropped, so every sound waits for a confirmed-running context
-function whenRunning(cb: (c: AudioContext) => void) {
-  const c = ensureCtx();
-  if (c.state === "running") cb(c);
-  else c.resume().then(() => cb(c)).catch(() => {});
-}
 
 // one shared bus: dry signal plus a soft 2-second room, so plucks ring
 // instead of stopping dead (the dryness was what read as "un-serene")
@@ -67,8 +40,8 @@ const SCALE = [
 ];
 
 export function pluck(noteIndex?: number, gain = 0.13) {
-  if (!enabled) return;
-  whenRunning((c) => pluckNow(c, noteIndex, gain));
+  if (!soundPref()) return;
+  whenAudioRunning((c) => pluckNow(c, noteIndex, gain));
 }
 
 function pluckNow(c: AudioContext, noteIndex?: number, gain = 0.13) {
@@ -141,7 +114,7 @@ function playPhrase(phrase: number[], gains: number[], spacing = 160) {
 
 // a short phrase for page transitions
 export function transitionMotif() {
-  if (!enabled) return;
+  if (!soundPref()) return;
   playPhrase(
     PHRASES[Math.floor(Math.random() * PHRASES.length)],
     [0.09, 0.075, 0.06]
@@ -150,14 +123,14 @@ export function transitionMotif() {
 
 // the greeting when sound is switched on: Sa, Pa, upper Sa
 export function chime() {
-  if (!enabled) return;
+  if (!soundPref()) return;
   playPhrase([0, 3, 5], [0.08, 0.07, 0.06], 190);
 }
 
 // blockprint stamp: a wood block pressed into cloth, no drum
 export function stamp() {
-  if (!enabled) return;
-  whenRunning(stampNow);
+  if (!soundPref()) return;
+  whenAudioRunning(stampNow);
 }
 
 function stampNow(c: AudioContext) {
@@ -200,8 +173,8 @@ function stampNow(c: AudioContext) {
 // a lighter touch of the same block: fingertips testing the carve,
 // for hovering the pursuit blocks (no string under it, no knock)
 export function press() {
-  if (!enabled) return;
-  whenRunning((c) => {
+  if (!soundPref()) return;
+  whenAudioRunning((c) => {
     const t = c.currentTime;
     const n = Math.floor(c.sampleRate * 0.09);
     const buf = c.createBuffer(1, n, c.sampleRate);
@@ -225,10 +198,13 @@ export function press() {
 }
 
 // wind that follows the pointer across the hero (kept dry: it's the room)
-let wind: { gain: GainNode; filter: BiquadFilterNode } | null = null;
+let wind: {
+  context: AudioContext;
+  gain: GainNode;
+  filter: BiquadFilterNode;
+} | null = null;
 
-function ensureWind() {
-  const c = ensureCtx();
+function ensureWind(c: AudioContext) {
   if (wind) return wind;
   // pink noise (Paul Kellet), far softer than white
   const len = c.sampleRate * 2;
@@ -257,18 +233,17 @@ function ensureWind() {
   gain.gain.value = 0;
   src.connect(filter).connect(gain).connect(c.destination);
   src.start();
-  wind = { gain, filter };
+  wind = { context: c, gain, filter };
   return wind;
 }
 
 export function windPulse(intensity: number) {
-  if (!enabled) return;
-  whenRunning(() => windPulseNow(intensity));
+  if (!soundPref()) return;
+  whenAudioRunning((context) => windPulseNow(context, intensity));
 }
 
-function windPulseNow(intensity: number) {
-  const c = ensureCtx();
-  const w = ensureWind();
+function windPulseNow(c: AudioContext, intensity: number) {
+  const w = ensureWind(c);
   const t = c.currentTime;
   const target = Math.min(0.035, intensity * 0.035);
   w.gain.gain.cancelScheduledValues(t);
@@ -278,8 +253,8 @@ function windPulseNow(intensity: number) {
   w.filter.frequency.setTargetAtTime(360 + intensity * 320, t, 0.2);
 }
 
-function stopWind() {
-  if (wind && ctx) {
-    wind.gain.gain.setTargetAtTime(0, ctx.currentTime, 0.05);
+export function stopWind() {
+  if (wind) {
+    wind.gain.gain.setTargetAtTime(0, wind.context.currentTime, 0.05);
   }
 }

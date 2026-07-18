@@ -1,28 +1,42 @@
 import React, { Fragment } from "react";
+import type { NotionRichText } from "@/lib/notion/types";
 
 const notionColors: Record<string, string> = {
-  red: "#c75b39",
+  red: "#dc8066",
   orange: "#d9a05b",
   yellow: "#d9c05b",
   green: "#7a8b6f",
-  blue: "#6f7f8b",
-  purple: "#8b6f85",
+  blue: "#86a3b8",
+  purple: "#b894b3",
   pink: "#b0707f",
   brown: "#a08b6f",
   gray: "#a9a294",
 };
 
-export default function Text({ text }: { text: any[] }) {
-  if (!text) return null;
+function safeLink(value: string): { href: string; external: boolean } | null {
+  if (value.startsWith("/") || value.startsWith("#")) {
+    return { href: value, external: false };
+  }
 
+  try {
+    const url = new URL(value);
+    if (!["http:", "https:", "mailto:", "tel:"].includes(url.protocol)) {
+      return null;
+    }
+    return {
+      href: url.toString(),
+      external: url.protocol === "http:" || url.protocol === "https:",
+    };
+  } catch {
+    return null;
+  }
+}
+
+export default function Text({ text }: { text: NotionRichText }) {
   return text.map((value, index) => {
-    const {
-      annotations: { bold, code, color, italic, strikethrough, underline },
-      text,
-    } = value;
-
-    if (!text) return null;
-
+    const { bold, code, color, italic, strikethrough, underline } =
+      value.annotations;
+    const content = value.plain_text;
     const className = [
       bold ? "font-semibold text-paper" : "",
       code
@@ -34,34 +48,37 @@ export default function Text({ text }: { text: any[] }) {
     ]
       .filter(Boolean)
       .join(" ");
-
     const style =
       color !== "default" && notionColors[color]
         ? { color: notionColors[color] }
         : {};
-
-    const renderLine = (content: string) =>
-      text.link ? (
-        <a href={text.link.url} target="_blank" rel="noopener noreferrer">
-          {content}
+    const link = value.href ? safeLink(value.href) : null;
+    const renderLine = (line: string) =>
+      link ? (
+        <a
+          href={link.href}
+          target={link.external ? "_blank" : undefined}
+          rel={link.external ? "noopener noreferrer" : undefined}
+          className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turmeric"
+        >
+          {line}
         </a>
       ) : (
-        content
+        line
       );
 
-    if (
-      typeof text.content === "string" &&
-      /[\r\n\u2028\u2029]/.test(text.content)
-    ) {
-      const lines = text.content
-        .replace(/\r\n?/g, "\n")
-        .replace(/[\u2028\u2029]/g, "\n")
-        .split("\n");
+    const normalizedContent = content
+      .replace(/\r\n?/g, "\n")
+      .replaceAll(String.fromCharCode(0x2028), "\n")
+      .replaceAll(String.fromCharCode(0x2029), "\n");
+
+    if (normalizedContent.includes("\n")) {
+      const lines = normalizedContent.split("\n");
       return (
         <span key={index} className={className} style={style}>
-          {lines.map((line: string, li: number) => (
-            <Fragment key={li}>
-              {li > 0 && <br />}
+          {lines.map((line, lineIndex) => (
+            <Fragment key={lineIndex}>
+              {lineIndex > 0 && <br />}
               {renderLine(line)}
             </Fragment>
           ))}
@@ -71,7 +88,7 @@ export default function Text({ text }: { text: any[] }) {
 
     return (
       <span key={index} className={className} style={style}>
-        {renderLine(text.content)}
+        {renderLine(content)}
       </span>
     );
   });

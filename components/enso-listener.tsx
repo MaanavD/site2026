@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useReducedMotion } from "motion/react";
 import { useInkTransition } from "./ink-transition";
 
 type Pt = { x: number; y: number; t: number };
@@ -11,12 +12,13 @@ type Pt = { x: number; y: number; t: number };
 export function EnsoListener() {
   const { navigate } = useInkTransition();
   const pathname = usePathname();
+  const reduceMotion = useReducedMotion();
   const [burst, setBurst] = useState<{ x: number; y: number; k: number } | null>(
     null
   );
 
   useEffect(() => {
-    if (!window.matchMedia("(pointer: fine)").matches) return;
+    if (reduceMotion || !window.matchMedia("(pointer: fine)").matches) return;
 
     const pts: Pt[] = [];
     let last = 0;
@@ -60,15 +62,13 @@ export function EnsoListener() {
 
       last = now;
       pts.length = 0;
-      localStorage.setItem("garden-unlocked", "1");
       setBurst({ x: cx, y: cy, k: now });
       setTimeout(() => navigate("/garden"), 550);
     };
 
     window.addEventListener("pointermove", onMove);
     return () => window.removeEventListener("pointermove", onMove);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [navigate, pathname, reduceMotion]);
 
   if (!burst) return null;
   return (

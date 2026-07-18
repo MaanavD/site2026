@@ -20,7 +20,7 @@ export function Gloss({
     <span className={`group/gloss relative inline-flex ${className}`}>
       {children}
       <span
-        className={`pointer-events-none absolute z-20 whitespace-nowrap rounded-sm border border-paper/10 bg-ink-800/95 px-2.5 py-1 font-mono text-[10px] tracking-wide text-paper-dim opacity-0 transition-opacity duration-300 group-hover/gloss:opacity-100 ${positions[side]}`}
+        className={`pointer-events-none absolute z-20 whitespace-nowrap rounded-sm border border-paper/10 bg-ink-800/95 px-2.5 py-1 font-mono text-[10px] tracking-wide text-paper-dim opacity-0 transition-opacity duration-300 group-hover/gloss:opacity-100 group-focus-within/gloss:opacity-100 ${positions[side]}`}
       >
         {gloss}
       </span>

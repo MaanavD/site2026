@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import type { MotionValue } from "motion/react";
+import { useReducedMotion, type MotionValue } from "motion/react";
 
 const vertexShader = /* glsl */ `
   void main() {
@@ -479,26 +479,34 @@ export default function StepwellCanvas({
 }) {
   const resolvedScene = scene ?? sceneFromHour(new Date().getHours());
   const resolvedSeason = season ?? seasonFromMonth(new Date().getMonth());
+  const reduceMotion = useReducedMotion();
 
   // the shader only breathes while it's on screen; once the visitor has
   // scrolled past, the GPU gets its evening off
   const wrap = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(true);
+  const [active, setActive] = useState(false);
   useEffect(() => {
     const el = wrap.current;
     if (!el) return;
-    const io = new IntersectionObserver(([entry]) =>
-      setActive(entry.isIntersecting)
-    );
+    let intersecting = false;
+    const update = () => setActive(intersecting && !document.hidden);
+    const io = new IntersectionObserver(([entry]) => {
+      intersecting = entry.isIntersecting;
+      update();
+    });
     io.observe(el);
-    return () => io.disconnect();
+    document.addEventListener("visibilitychange", update);
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", update);
+    };
   }, []);
 
   return (
-    <div ref={wrap} style={{ position: "absolute", inset: 0 }}>
+    <div ref={wrap} aria-hidden style={{ position: "absolute", inset: 0 }}>
       <Canvas
         dpr={[1, 1.5]}
-        frameloop={active ? "always" : "never"}
+        frameloop={active && !reduceMotion ? "always" : "never"}
         gl={{ antialias: false, powerPreference: "high-performance" }}
         style={{ position: "absolute", inset: 0 }}
       >

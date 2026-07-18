@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { motion, useInView, useScroll } from "motion/react";
+import { useEffect, useRef } from "react";
+import { motion, useInView, useReducedMotion, useScroll } from "motion/react";
 import { Gloss } from "./gloss";
 import { LotusSeal } from "./motifs";
 import { RangoliRail } from "./rangoli-rail";
-import { stamp } from "@/lib/sound";
-import { isRead, markRead } from "@/lib/read-marks";
+import { markPostRead, useReadStatus } from "./use-local-storage-boolean";
 
 export function PostShell({
   slug,
@@ -37,16 +36,17 @@ export function PostShell({
 function EndHanko({ slug }: { slug: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "0px 0px -10% 0px" });
-  const [already, setAlready] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const already = useReadStatus(slug);
   const stamped = useRef(false);
-
-  useEffect(() => setAlready(isRead(slug)), [slug]);
 
   useEffect(() => {
     if (inView && !stamped.current) {
       stamped.current = true;
-      if (!already) stamp();
-      markRead(slug);
+      if (!already) {
+        void import("@/lib/sound").then(({ stamp }) => stamp());
+      }
+      markPostRead(slug);
     }
   }, [inView, slug, already]);
 
@@ -62,8 +62,12 @@ function EndHanko({ slug }: { slug: string }) {
           animate={
             inView ? { scale: 1, opacity: already ? 0.85 : 1, rotate: 3 } : {}
           }
-          transition={{ type: "spring", stiffness: 320, damping: 19 }}
-          className="flex h-14 w-14 items-center justify-center rounded-sm bg-madder text-ink-950 shadow-[0_0_30px_rgba(143,59,46,0.35)]"
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : { type: "spring", stiffness: 320, damping: 19 }
+          }
+          className="flex h-14 w-14 items-center justify-center rounded-sm bg-madder text-paper shadow-[0_0_30px_rgba(143,59,46,0.35)]"
         >
           <LotusSeal className="h-9 w-9" />
         </motion.span>

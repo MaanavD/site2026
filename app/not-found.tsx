@@ -1,50 +1,18 @@
 import { TransitionLink } from "@/components/ink-transition";
+import { LotusOutline, RiverLines } from "@/components/motifs";
 
 export default function NotFound() {
   return (
     <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden px-6 text-center">
-      {/* a lotus adrift on dark water */}
-      <svg
-        viewBox="0 0 400 320"
+      <div
         aria-hidden
-        className="w-72 max-w-full text-ink-700 md:w-96"
+        className="relative h-64 w-72 max-w-full text-ink-700 md:h-72 md:w-96"
       >
-        <g
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          {/* petals */}
-          <path d="M200 118 C 226 150, 229 196, 200 230 C 171 196, 174 150, 200 118 Z" />
-          <path d="M138 138 C 167 159, 186 196, 194 228 C 159 215, 138 180, 138 138 Z" />
-          <path d="M262 138 C 233 159, 214 196, 206 228 C 241 215, 262 180, 262 138 Z" />
-          <path d="M84 184 C 118 195, 153 213, 182 233 C 139 239, 99 222, 84 184 Z" />
-          <path d="M316 184 C 282 195, 247 213, 218 233 C 261 239, 301 222, 316 184 Z" />
-          {/* the water it floats on */}
-          <path d="M62 252 Q 200 270 338 252" strokeWidth="4" />
-          <path d="M112 274 Q 200 286 288 274" strokeWidth="3" opacity="0.7" />
-          <path d="M152 294 Q 200 301 248 294" strokeWidth="2.5" opacity="0.45" />
-        </g>
-        {/* a lamp burning at the lotus heart */}
-        <circle cx="200" cy="192" r="7" fill="var(--color-turmeric)">
-          <animate
-            attributeName="opacity"
-            values="0.5;1;0.5"
-            dur="3.5s"
-            repeatCount="indefinite"
-          />
-        </circle>
-        <circle cx="200" cy="192" r="22" fill="var(--color-turmeric)" opacity="0.12">
-          <animate
-            attributeName="r"
-            values="18;26;18"
-            dur="3.5s"
-            repeatCount="indefinite"
-          />
-        </circle>
-      </svg>
+        <LotusOutline className="absolute left-1/2 top-8 h-44 w-44 -translate-x-1/2 md:h-52 md:w-52" />
+        <RiverLines className="absolute inset-x-0 bottom-0 h-24 w-full opacity-70" />
+        <span className="absolute left-1/2 top-[47%] h-4 w-4 -translate-x-1/2 rounded-full bg-turmeric" />
+        <span className="absolute left-1/2 top-[47%] h-12 w-12 -translate-x-1/2 -translate-y-4 animate-pulse rounded-full bg-turmeric/10" />
+      </div>
 
       {/* drifting river mist */}
       <div
@@ -71,7 +39,7 @@ export default function NotFound() {
       </p>
       <TransitionLink
         href="/"
-        className="mt-10 rounded-sm bg-madder px-8 py-4 font-medium text-ink-950 transition-transform duration-300 hover:-translate-y-0.5"
+        className="mt-10 rounded-sm bg-madder px-8 py-4 font-medium text-paper transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
       >
         Float back home
       </TransitionLink>

@@ -1,9 +1,8 @@
 type MotifProps = { className?: string };
 
 // Filled icons use path data from Phosphor Icons (phosphoricons.com, MIT),
-// embedded directly so sizing stays under our control. The Indian-specific
-// motifs no icon set carries (kite, paisley, sparkler, buti) are drawn on
-// the same 256 grid with the same stroke weight so the family reads as one.
+// embedded directly so sizing stays under our control. The remaining studies
+// use simple procedural geometry on the same 256 grid.
 
 function Filled({ d, className }: { d: string; className?: string }) {
   return (
@@ -19,7 +18,7 @@ export const LOTUS_FILL =
 const LOTUS_LINE =
   "M245.83,121.63a15.53,15.53,0,0,0-9.52-7.33,73.51,73.51,0,0,0-22.17-2.22c4-19.85,1-35.55-2.06-44.86a16.15,16.15,0,0,0-18.79-10.88,85.53,85.53,0,0,0-28.55,12.12,94.58,94.58,0,0,0-27.11-33.25,16.05,16.05,0,0,0-19.26,0A94.48,94.48,0,0,0,91.26,68.46,85.53,85.53,0,0,0,62.71,56.34,16.15,16.15,0,0,0,43.92,67.22c-3,9.31-6,25-2.06,44.86a73.51,73.51,0,0,0-22.17,2.22,15.53,15.53,0,0,0-9.52,7.33,16,16,0,0,0-1.6,12.27c3.39,12.57,13.8,36.48,45.33,55.32S113.13,208,128.05,208s42.67,0,74-18.78c31.53-18.84,41.94-42.75,45.33-55.32A16,16,0,0,0,245.83,121.63ZM59.14,72.14a.2.2,0,0,1,.23-.15A70.43,70.43,0,0,1,85.18,83.66,118.65,118.65,0,0,0,80,119.17c0,18.74,3.77,34,9.11,46.28A123.59,123.59,0,0,1,69.57,140C51.55,108.62,55.3,84,59.14,72.14Zm3,103.35C35.47,159.57,26.82,140.05,24,129.7a59.82,59.82,0,0,1,22.5-1.17,129.08,129.08,0,0,0,9.15,19.41,142.28,142.28,0,0,0,34,39.56A114.92,114.92,0,0,1,62.1,175.49ZM128,190.4c-9.33-6.94-32-28.23-32-71.23C96,76.7,118.38,55.24,128,48c9.62,7.26,32,28.72,32,71.19C160,162.17,137.33,183.46,128,190.4ZM170.82,83.66A70.43,70.43,0,0,1,196.63,72a.2.2,0,0,1,.23.15C200.7,84,204.45,108.62,186.43,140a123.32,123.32,0,0,1-19.54,25.48c5.34-12.26,9.11-27.54,9.11-46.28A118.65,118.65,0,0,0,170.82,83.66ZM232,129.72c-2.77,10.25-11.4,29.81-38.09,45.77a114.92,114.92,0,0,1-27.55,12,142.28,142.28,0,0,0,34-39.56,129.08,129.08,0,0,0,9.15-19.41A59.69,59.69,0,0,1,232,129.71Z";
 
-const TREE =
+export const TREE_FILL =
   "M198.1,62.59a76,76,0,0,0-140.2,0A71.71,71.71,0,0,0,16,127.8C15.9,166,48,199,86.14,200A72.09,72.09,0,0,0,120,192.47V232a8,8,0,0,0,16,0V192.47A72.17,72.17,0,0,0,168,200l1.82,0C208,199,240.11,166,240,127.8A71.71,71.71,0,0,0,198.1,62.59ZM169.45,184a56.08,56.08,0,0,1-33.45-10v-41l43.58-21.78a8,8,0,1,0-7.16-14.32L136,115.06V88a8,8,0,0,0-16,0v51.06L83.58,120.84a8,8,0,1,0-7.16,14.32L120,156.94v17a56,56,0,0,1-33.45,10C56.9,183.23,31.92,157.52,32,127.84A55.77,55.77,0,0,1,67.11,76a8,8,0,0,0,4.53-4.67,60,60,0,0,1,112.72,0A8,8,0,0,0,188.89,76,55.79,55.79,0,0,1,224,127.84C224.08,157.52,199.1,183.23,169.45,184Z";
 
 const WAVES =
@@ -46,7 +45,7 @@ export function LotusOutline({ className = "" }: MotifProps) {
 
 // a full-canopy tree: the black forest, block printed
 export function TreeOfLife({ className = "" }: MotifProps) {
-  return <Filled d={TREE} className={className} />;
+  return <Filled d={TREE_FILL} className={className} />;
 }
 
 // water, moving: three currents of a river
@@ -113,83 +112,10 @@ export function TennisBall({ className = "" }: MotifProps) {
   return <Filled d={TENNIS} className={className} />;
 }
 
-const stroke = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 14,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-} as const;
-
-// an Uttarayan fighter kite: bowed spar, long tail
-export function Kite({ className = "" }: MotifProps) {
-  return (
-    <svg viewBox="0 0 256 256" className={className} aria-hidden>
-      <g {...stroke}>
-        <path d="M128 24 L214 112 L128 204 L42 112 Z" />
-        <path d="M128 24 L128 204" />
-        <path d="M42 112 Q128 78 214 112" />
-        <path d="M128 204 C 116 220 140 230 126 248" />
-      </g>
-      <circle cx="126" cy="248" r="7" fill="currentColor" />
-    </svg>
-  );
-}
-
-// a paisley (boteh): a round bulb whose neck curls over and hooks back
-export function Paisley({ className = "" }: MotifProps) {
-  return (
-    <svg viewBox="0 0 256 256" className={className} aria-hidden>
-      <g {...stroke}>
-        <path d="M112 228 A 72 72 0 0 1 40 156 A 72 72 0 0 1 76 94 C 96 74 128 60 146 46 A 26 26 0 1 1 190 74 C 184 88 170 94 154 90 C 170 104 184 128 184 156 A 72 72 0 0 1 112 228 Z" />
-      </g>
-      <g fill="currentColor">
-        <circle cx="126" cy="152" r="12" />
-        <circle cx="88" cy="172" r="7" />
-        <circle cx="80" cy="138" r="7" />
-        <circle cx="96" cy="108" r="7" />
-        <circle cx="128" cy="88" r="7" />
-      </g>
-    </svg>
-  );
-}
-
 // a buti (floral sprig), the workhorse of Indian blockprint
 const TULIP =
   "M208,48a87.48,87.48,0,0,0-35.36,7.43c-15.1-25.37-39.92-38-41.06-38.59a8,8,0,0,0-7.16,0c-1.14.58-26,13.22-41.06,38.59A87.48,87.48,0,0,0,48,48a8,8,0,0,0-8,8V96a88.11,88.11,0,0,0,80,87.63v35.43L83.58,200.84a8,8,0,1,0-7.16,14.32l48,24a8,8,0,0,0,7.16,0l48-24a8,8,0,0,0-7.16-14.32L136,219.06V183.63A88.11,88.11,0,0,0,216,96V56A8,8,0,0,0,208,48ZM120,167.56A72.1,72.1,0,0,1,56,96V64.44A72.1,72.1,0,0,1,120,136Zm8-68.2A88.4,88.4,0,0,0,97.36,63.19c9.57-15.79,24-25.9,30.64-30,6.65,4.08,21.08,14.19,30.64,30A88.46,88.46,0,0,0,128,99.36ZM200,96a72.1,72.1,0,0,1-64,71.56V136a72.1,72.1,0,0,1,64-71.56Z";
 
 export function Buti({ className = "" }: MotifProps) {
   return <Filled d={TULIP} className={className} />;
-}
-
-// a phuljhari (sparkler), mid-burn
-export function Sparkler({ className = "", lit = true }: MotifProps & { lit?: boolean }) {
-  return (
-    <svg viewBox="0 0 256 256" className={className} aria-hidden>
-      <g {...stroke}>
-        <path d="M156 240 L134 148" />
-        {lit && (
-          <g strokeWidth={12}>
-            <path d="M128 124 L128 64" />
-            <path d="M128 124 L172 82" />
-            <path d="M128 124 L188 118" />
-            <path d="M128 124 L170 164" />
-            <path d="M128 124 L84 82" />
-            <path d="M128 124 L68 118" />
-            <path d="M128 124 L86 164" />
-          </g>
-        )}
-      </g>
-      {lit && (
-        <g fill="currentColor">
-          <circle cx="128" cy="40" r="7" />
-          <circle cx="196" cy="66" r="6" />
-          <circle cx="212" cy="140" r="7" />
-          <circle cx="60" cy="66" r="6" />
-          <circle cx="44" cy="140" r="7" />
-          <circle cx="128" cy="124" r="10" />
-        </g>
-      )}
-    </svg>
-  );
 }

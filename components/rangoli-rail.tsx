@@ -4,13 +4,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   motion,
   useMotionValueEvent,
+  useReducedMotion,
   useTransform,
   type MotionValue,
 } from "motion/react";
 import { Gloss } from "./gloss";
 import { LotusSeal } from "./motifs";
-import { stamp } from "@/lib/sound";
-import { isRead, markRead } from "@/lib/read-marks";
+import { markPostRead, useReadStatus } from "./use-local-storage-boolean";
+import { isRead } from "@/lib/read-marks";
 
 // A temple-border rangoli laid down the margin: the stepped teeth that
 // run along a Kanjivaram's edge and up every gopuram, drawn in powder.
@@ -25,10 +26,10 @@ const rnd = (i: number, s: number) =>
   fract(Math.sin(i * 127.1 + s * 311.7) * 43758.5453);
 
 const POWDER = {
-  rice: "#ece2cc",
-  turmeric: "#d9a441",
-  madder: "#b85a45",
-  peacock: "#3f8f87",
+  rice: "var(--color-paper)",
+  turmeric: "var(--color-turmeric)",
+  madder: "var(--color-madder-powder)",
+  peacock: "var(--color-peacock-powder)",
 };
 
 const STEPS = 3;
@@ -109,16 +110,18 @@ export function RangoliRail({
   );
 
   // the seal at the foot: pressed when the border is finished
-  const [already, setAlready] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const already = useReadStatus(slug);
   const [stamped, setStamped] = useState(false);
-  useEffect(() => setAlready(isRead(slug)), [slug]);
   useMotionValueEvent(progress, "change", (v) => {
     // hRef is 0 when the rail is display:none (below lg); the seal in
     // the column owns the moment there
     if (v >= 0.985 && !stamped && hRef.current > 0) {
       setStamped(true);
-      if (!isRead(slug)) stamp();
-      markRead(slug);
+      if (!isRead(slug)) {
+        void import("@/lib/sound").then(({ stamp }) => stamp());
+      }
+      markPostRead(slug);
     }
   });
 
@@ -175,14 +178,22 @@ export function RangoliRail({
               />
             </filter>
             <mask id="laid-powder" maskUnits="userSpaceOnUse">
-              <motion.rect x="0" width={W} y="0" style={{ height: solidH }} fill="#fff" />
               <motion.rect
                 x="0"
                 width={W}
-                style={{ y: frontY }}
-                height="72"
-                fill="url(#front-fade)"
+                y="0"
+                style={{ height: reduceMotion ? h : solidH }}
+                fill="#fff"
               />
+              {!reduceMotion && (
+                <motion.rect
+                  x="0"
+                  width={W}
+                  style={{ y: frontY }}
+                  height="72"
+                  fill="url(#front-fade)"
+                />
+              )}
             </mask>
           </defs>
 
@@ -263,8 +274,12 @@ export function RangoliRail({
                 ? { scale: 1, opacity: already && !stamped ? 0.85 : 1, rotate: 3 }
                 : {}
             }
-            transition={{ type: "spring", stiffness: 320, damping: 19 }}
-            className="flex h-12 w-12 items-center justify-center rounded-sm bg-madder text-ink-950 shadow-[0_0_26px_rgba(143,59,46,0.35)]"
+            transition={
+              reduceMotion
+                ? { duration: 0 }
+                : { type: "spring", stiffness: 320, damping: 19 }
+            }
+            className="flex h-12 w-12 items-center justify-center rounded-sm bg-madder text-paper shadow-[0_0_26px_rgba(143,59,46,0.35)]"
           >
             <LotusSeal className="h-8 w-8" />
           </motion.span>

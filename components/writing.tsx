@@ -22,7 +22,7 @@ export async function Writing() {
             <TransitionLink
               href={`/blog/${post.slug}`}
               morph
-              className="group flex items-baseline justify-between gap-6 py-7"
+              className="group flex items-baseline justify-between gap-6 py-7 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
             >
               <div className="min-w-0">
                 <p className="font-mono text-xs text-paper-faint">
@@ -31,12 +31,12 @@ export async function Writing() {
                     <span className="ml-3 text-turmeric">{post.category}</span>
                   )}
                 </p>
-                <h3 className="mt-2 truncate font-display text-2xl text-paper-dim transition-colors group-hover:text-paper md:text-3xl">
+                <h3 className="mt-2 line-clamp-2 font-display text-2xl text-paper-dim transition-colors group-hover:text-paper group-focus-visible:text-paper md:text-3xl">
                   <span data-morph={post.title}>{post.title}</span>
                   <ReadStamp slug={post.slug} />
                 </h3>
               </div>
-              <span className="shrink-0 text-madder opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
+              <span className="shrink-0 text-madder opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100 group-focus-visible:opacity-100">
                 →
               </span>
             </TransitionLink>
@@ -44,7 +44,7 @@ export async function Writing() {
         ))}
       </div>
       <Reveal delay={0.2} className="mt-10">
-        <TransitionLink href="/blog" className="brush-link text-sm text-paper-dim hover:text-paper">
+        <TransitionLink href="/blog" className="brush-link text-sm text-paper-dim hover:text-paper focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric">
           All writing →
         </TransitionLink>
       </Reveal>

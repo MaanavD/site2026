@@ -35,10 +35,10 @@ export async function Footer() {
               else.
             </p>
           </div>
-          <ul className="flex gap-6 text-sm text-paper-dim">
+          <ul className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-paper-dim">
             <li>
               <a
-                className="brush-link hover:text-paper"
+                className="brush-link hover:text-paper focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
                 href="https://github.com/MaanavD"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -48,7 +48,7 @@ export async function Footer() {
             </li>
             <li>
               <a
-                className="brush-link hover:text-paper"
+                className="brush-link hover:text-paper focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
                 href="https://x.com/maanavdalal"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -58,7 +58,7 @@ export async function Footer() {
             </li>
             <li>
               <a
-                className="brush-link hover:text-paper"
+                className="brush-link hover:text-paper focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
                 href="https://linkedin.com/in/maanavdalal"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -67,13 +67,18 @@ export async function Footer() {
               </a>
             </li>
             <li>
-              <Link className="brush-link hover:text-paper" href="/blog/rss.xml">
+              <Link className="brush-link hover:text-paper focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric" href="/blog/rss.xml">
                 RSS
+              </Link>
+            </li>
+            <li>
+              <Link className="brush-link hover:text-paper focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric" href="/garden">
+                Courtyard
               </Link>
             </li>
           </ul>
         </div>
-        <div className="mt-12 flex items-center justify-between text-xs text-paper-faint">
+        <div className="mt-12 flex flex-col items-start gap-2 text-xs text-paper-faint sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 Maanav Dalal</p>
           <p>Set in Rozha One · Dyed live in WebGL</p>
         </div>

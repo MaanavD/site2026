@@ -5,22 +5,30 @@ import { formatDate } from "@/lib/format";
 import { Reveal } from "@/components/reveal";
 import { ReadStamp } from "@/components/read-stamp";
 import { RiverLines } from "@/components/motifs";
+import {
+  BLOG_DESCRIPTION,
+  canonicalAlternates,
+  sharedOpenGraph,
+  sharedTwitter,
+} from "@/lib/seo";
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Writing",
-  description: "Meanderings, reviews, and lists by Maanav Dalal.",
+  description: BLOG_DESCRIPTION,
+  alternates: canonicalAlternates("/blog"),
   openGraph: {
+    ...sharedOpenGraph,
     title: "Writing · Maanav Dalal",
-    description: "Meanderings, reviews, and lists by Maanav Dalal.",
+    description: BLOG_DESCRIPTION,
     url: "/blog",
     type: "website",
   },
   twitter: {
-    card: "summary_large_image",
+    ...sharedTwitter,
     title: "Writing · Maanav Dalal",
-    description: "Meanderings, reviews, and lists by Maanav Dalal.",
+    description: BLOG_DESCRIPTION,
   },
 };
 
@@ -70,10 +78,10 @@ export default async function BlogPage() {
                   <TransitionLink
                     href={`/blog/${post.slug}`}
                     morph
-                    className="group flex items-baseline justify-between gap-6 py-5"
+                    className="group flex items-baseline justify-between gap-6 py-5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
                   >
                     <div className="min-w-0">
-                      <h3 className="truncate font-display text-xl text-paper-dim transition-colors group-hover:text-paper md:text-2xl">
+                      <h3 className="line-clamp-2 font-display text-xl text-paper-dim transition-colors group-hover:text-paper group-focus-visible:text-paper md:text-2xl">
                         <span data-morph={post.title}>{post.title}</span>
                         <ReadStamp slug={post.slug} />
                       </h3>
@@ -86,7 +94,7 @@ export default async function BlogPage() {
                         )}
                       </p>
                     </div>
-                    <span className="shrink-0 text-madder opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
+                    <span className="shrink-0 text-madder opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100 group-focus-visible:opacity-100">
                       →
                     </span>
                   </TransitionLink>

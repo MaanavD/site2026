@@ -27,6 +27,15 @@ export const metadata: Metadata = {
 };
 
 // deterministic per-slug randomness so each rangoli is stable across builds
+function seedHash(seed: string) {
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
 function rng(seed: string) {
   let h = 2166136261;
   for (let i = 0; i < seed.length; i++) {
@@ -40,7 +49,12 @@ function rng(seed: string) {
   };
 }
 
-const POWDERS = ["#8f3b2e", "#d9a441", "#1f5f5b", "#c9bfa8"];
+const POWDERS = [
+  "var(--color-madder)",
+  "var(--color-turmeric)",
+  "var(--color-peacock)",
+  "var(--color-paper-dim)",
+];
 
 type Ring = {
   kind: number; // 0 dots, 1 petals, 2 diamonds, 3 arc
@@ -56,7 +70,7 @@ function Rangoli({ seed }: { seed: string }) {
   const ringCount = 2 + Math.floor(r() * 3);
   const bindu = POWDERS[Math.floor(r() * 2)]; // madder or turmeric centre
   const wobbleSeed = Math.floor(r() * 90);
-  const fid = `rg-${seed.replace(/[^a-z0-9]/gi, "").slice(0, 12)}`;
+  const fid = `rg-${seedHash(seed)}`;
 
   const rings: Ring[] = [];
   let radius = 13;
@@ -167,7 +181,7 @@ export default async function GardenPage() {
     <div className="relative mx-auto max-w-5xl px-6 pt-36 pb-28">
       <span
         aria-hidden
-        className="pointer-events-none absolute -top-10 right-0 w-64 select-none text-paper/5"
+        className="pointer-events-none absolute -top-10 right-0 hidden w-64 select-none text-paper/5 sm:block"
       >
         <Rangoli seed="courtyard" />
       </span>
@@ -190,10 +204,10 @@ export default async function GardenPage() {
           <Reveal key={post.id} delay={(i % 4) * 0.06}>
             <TransitionLink
               href={`/blog/${post.slug}`}
-              className="group block rounded-sm border border-paper/8 bg-ink-900/60 p-4 transition-colors hover:border-madder/40"
+              className="group block rounded-sm border border-paper/8 bg-ink-900/60 p-4 transition-colors hover:border-madder/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turmeric"
             >
               <Rangoli seed={post.slug} />
-              <p className="mt-2 truncate font-display text-sm text-paper-dim transition-colors group-hover:text-paper">
+              <p className="mt-2 line-clamp-2 font-display text-sm text-paper-dim transition-colors group-hover:text-paper group-focus-visible:text-paper">
                 {post.title}
               </p>
               <p className="mt-1 font-mono text-[10px] text-paper-faint">

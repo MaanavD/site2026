@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, type RefObject } from "react";
-import { windPulse } from "@/lib/sound";
+import { useReducedMotion } from "motion/react";
 
 // soft wind through the trees as the pointer stirs the ink.
 // listens on the given element only, so it stays inside the hero.
 export function useWind(ref: RefObject<HTMLElement | null>) {
+  const reduceMotion = useReducedMotion();
+
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || reduceMotion) return;
 
     let lastX = 0;
     let lastY = 0;
@@ -23,7 +25,9 @@ export function useWind(ref: RefObject<HTMLElement | null>) {
         const speed = dist / Math.max(dt, 1);
         if (now - throttle > 60) {
           throttle = now;
-          windPulse(Math.min(1, speed * 0.5));
+          void import("@/lib/sound").then(({ windPulse }) =>
+            windPulse(Math.min(1, speed * 0.5)),
+          );
         }
       }
       lastX = e.clientX;
@@ -33,5 +37,5 @@ export function useWind(ref: RefObject<HTMLElement | null>) {
 
     el.addEventListener("pointermove", onMove);
     return () => el.removeEventListener("pointermove", onMove);
-  }, [ref]);
+  }, [ref, reduceMotion]);
 }

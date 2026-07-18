@@ -3,15 +3,15 @@
 import Link from "next/link";
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { motion } from "motion/react";
-import { transitionMotif } from "@/lib/sound";
-import { Buti, LotusSeal, Paisley, TreeOfLife } from "./motifs";
+import { motion, useReducedMotion } from "motion/react";
+import { Buti, LotusSeal, TreeOfLife } from "./motifs";
 
 type Phase = "idle" | "covering" | "revealing";
 
@@ -19,14 +19,14 @@ type MorphFrom = { text: string; x: number; y: number; fontSize: number };
 type MorphTarget = { x: number; y: number; fontSize: number };
 
 type TransitionApi = {
-  navigate: (href: string, morph?: MorphFrom) => void;
+  navigate: (href: string, morph?: MorphFrom) => boolean;
   morphText: string | null;
   morphDone: boolean;
   registerMorphTarget: (t: MorphTarget) => void;
 };
 
 const TransitionContext = createContext<TransitionApi>({
-  navigate: () => {},
+  navigate: () => false,
   morphText: null,
   morphDone: true,
   registerMorphTarget: () => {},
@@ -36,7 +36,6 @@ export const useInkTransition = () => useContext(TransitionContext);
 
 // each destination gets its own block pressed mid-wipe
 const MOTIFS = {
-  paisley: Paisley,
   tree: TreeOfLife,
   lotus: LotusSeal,
   buti: Buti,
@@ -46,7 +45,7 @@ type MotifKey = keyof typeof MOTIFS;
 
 const motifFor = (href: string): MotifKey =>
   href.startsWith("/blog")
-    ? "paisley"
+    ? "buti"
     : href === "/"
       ? "tree"
       : href.startsWith("/garden")
@@ -56,13 +55,14 @@ const motifFor = (href: string): MotifKey =>
 // the stamp-pad kiss of madder first, then the dye takes the page
 const layers = [
   { color: "var(--color-madder)", delay: 0 },
-  { color: "var(--color-ink-800)", delay: 0.07 },
-  { color: "var(--color-ink-950)", delay: 0.14 },
+  { color: "var(--color-ink-800)", delay: 0.05 },
+  { color: "var(--color-ink-950)", delay: 0.1 },
 ];
 
 export function InkTransition({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const reduceMotion = useReducedMotion();
   const [phase, setPhase] = useState<Phase>("idle");
   const [glyph, setGlyph] = useState<MotifKey>("buti");
   const [morph, setMorph] = useState<MorphFrom | null>(null);
@@ -70,12 +70,17 @@ export function InkTransition({ children }: { children: React.ReactNode }) {
   const [morphDone, setMorphDone] = useState(true);
   const target = useRef<string | null>(null);
 
-  const navigate = (href: string, morphFrom?: MorphFrom) => {
-    if (phase !== "idle") return;
+  const navigate = useCallback((href: string, morphFrom?: MorphFrom) => {
+    if (phase !== "idle") return false;
     if (href === pathname) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
+      window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+      return true;
     }
+    if (reduceMotion) {
+      router.push(href);
+      return true;
+    }
+
     target.current = href;
     setGlyph(motifFor(href));
     if (morphFrom) {
@@ -83,8 +88,9 @@ export function InkTransition({ children }: { children: React.ReactNode }) {
       setMorphDone(false);
     }
     setPhase("covering");
-    transitionMotif();
-  };
+    void import("@/lib/sound").then(({ transitionMotif }) => transitionMotif());
+    return true;
+  }, [pathname, phase, reduceMotion, router]);
 
   useEffect(() => {
     if (phase === "covering" && target.current === null && pathname) {
@@ -127,7 +133,7 @@ export function InkTransition({ children }: { children: React.ReactNode }) {
             transition={
               phase === "idle"
                 ? { duration: 0 }
-                : { duration: 0.65, delay: l.delay, ease: [0.76, 0, 0.24, 1] }
+                : { duration: 0.42, delay: l.delay, ease: [0.76, 0, 0.24, 1] }
             }
             onAnimationComplete={() => {
               if (i !== layers.length - 1) return;
@@ -210,9 +216,18 @@ export function TransitionLink({
       onClick={(e) => {
         onClick?.(e);
         const h = typeof href === "string" ? href : (href.pathname ?? "/");
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || h.includes("#"))
+        if (
+          e.defaultPrevented ||
+          e.metaKey ||
+          e.ctrlKey ||
+          e.shiftKey ||
+          e.altKey ||
+          e.currentTarget.target === "_blank" ||
+          e.currentTarget.hasAttribute("download") ||
+          h.includes("#")
+        ) {
           return;
-        e.preventDefault();
+        }
 
         let morphFrom: MorphFrom | undefined;
         if (morph) {
@@ -227,6 +242,7 @@ export function TransitionLink({
             };
           }
         }
+        e.preventDefault();
         navigate(h, morphFrom);
       }}
     >

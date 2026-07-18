@@ -5,16 +5,13 @@ import {
   CoffeeCup,
   Fist,
   Flame,
-  Kite,
   LotusOutline,
   LotusSeal,
   Marigold,
   Mountains,
-  Paisley,
   PeacockFeather,
   RiverLines,
   Skier,
-  Sparkler,
   TennisBall,
   TreeOfLife,
 } from "@/components/motifs";
@@ -32,10 +29,7 @@ const MOTIFS = [
   ["PeacockFeather", PeacockFeather],
   ["Flame", Flame],
   ["Marigold", Marigold],
-  ["Kite", Kite],
-  ["Paisley", Paisley],
   ["Buti", Buti],
-  ["Sparkler", Sparkler],
   ["CoffeeCup", CoffeeCup],
   ["Barbell", Barbell],
   ["Mountains", Mountains],
@@ -57,7 +51,7 @@ export default function MotifSheet() {
             <M className="h-24 w-24 text-paper" />
             <div className="flex items-center gap-3">
               <M className="h-5 w-5 text-turmeric" />
-              <span className="flex h-9 w-9 items-center justify-center rounded-sm bg-madder text-ink-950">
+              <span className="flex h-9 w-9 items-center justify-center rounded-sm bg-madder text-paper">
                 <M className="h-6 w-6" />
               </span>
               <span className="w-10 text-paper/10">
@@ -67,12 +61,6 @@ export default function MotifSheet() {
             <p className="font-mono text-[10px] text-paper-faint">{name}</p>
           </div>
         ))}
-        <div className="flex flex-col items-center gap-4 rounded-sm border border-paper/10 p-6">
-          <Sparkler className="h-24 w-24 text-paper" lit={false} />
-          <p className="font-mono text-[10px] text-paper-faint">
-            Sparkler (out)
-          </p>
-        </div>
       </div>
     </div>
   );

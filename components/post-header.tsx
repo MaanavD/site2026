@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { TransitionLink, useInkTransition } from "./ink-transition";
 import { Gloss } from "./gloss";
 import { RiverLines } from "./motifs";
@@ -18,9 +18,10 @@ export function PostHeader({
   category: string | null;
 }) {
   const { morphText, morphDone, registerMorphTarget } = useInkTransition();
+  const reduceMotion = useReducedMotion();
   // latch at mount: once a morph landing, always a morph landing, when the
   // morph settles and morphText clears, the title must NOT replay the whisk
-  const [isMorph] = useState(() => morphText === title);
+  const [isMorph] = useState(() => !reduceMotion && morphText === title);
   const h1 = useRef<HTMLHeadingElement>(null);
   let charIndex = 0;
 
@@ -56,22 +57,26 @@ export function PostHeader({
   return (
     <header className="mb-14">
       <motion.div
-        initial={{ opacity: 0, x: -12 }}
+        initial={reduceMotion ? false : { opacity: 0, x: -12 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, delay: 0.35, ease }}
+        transition={
+          reduceMotion ? { duration: 0 } : { duration: 0.6, delay: 0.35, ease }
+        }
       >
         <TransitionLink
           href="/blog"
-          className="brush-link font-mono text-xs text-paper-faint hover:text-paper"
+          className="brush-link font-mono text-xs text-paper-faint hover:text-paper focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
         >
           ← All writing
         </TransitionLink>
       </motion.div>
 
       <motion.p
-        initial={{ opacity: 0 }}
+        initial={reduceMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.7, delay: 0.5 }}
+        transition={
+          reduceMotion ? { duration: 0 } : { duration: 0.7, delay: 0.5 }
+        }
         className="mt-8 font-mono text-xs text-paper-faint"
       >
         {date}
@@ -102,9 +107,15 @@ export function PostHeader({
                   <motion.span
                     key={i}
                     className="inline-block"
-                    initial={{ opacity: 0, y: "0.5em", rotate: 3 }}
+                    initial={
+                      reduceMotion ? false : { opacity: 0, y: "0.5em", rotate: 3 }
+                    }
                     animate={{ opacity: 1, y: 0, rotate: 0 }}
-                    transition={{ duration: 0.7, delay: d, ease }}
+                    transition={
+                      reduceMotion
+                        ? { duration: 0 }
+                        : { duration: 0.7, delay: d, ease }
+                    }
                   >
                     {ch}
                   </motion.span>
@@ -122,15 +133,19 @@ export function PostHeader({
       >
         <motion.span
           className="h-px w-16 origin-left bg-madder/60"
-          initial={{ scaleX: 0 }}
+          initial={reduceMotion ? false : { scaleX: 0 }}
           animate={{ scaleX: 1 }}
-          transition={{ duration: 0.8, delay: 0.9, ease }}
+          transition={
+            reduceMotion ? { duration: 0 } : { duration: 0.8, delay: 0.9, ease }
+          }
         />
         <Gloss gloss="writing meanders. rivers agree." side="top">
           <motion.span
-            initial={{ opacity: 0, x: -8 }}
+            initial={reduceMotion ? false : { opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 1.1, ease }}
+            transition={
+              reduceMotion ? { duration: 0 } : { duration: 0.6, delay: 1.1, ease }
+            }
           >
             <RiverLines className="h-5 w-5" />
           </motion.span>

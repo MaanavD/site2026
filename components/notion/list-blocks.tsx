@@ -1,32 +1,44 @@
 import React from "react";
-import Block from "./block";
+import type { NotionBlock } from "@/lib/notion/types";
+import Block, { type PostSlugMap } from "./block";
 
-// Groups consecutive list items into ul/ol so Notion's flat block
-// stream renders as proper lists.
-export function ListBlocks({ blocks }: { blocks: any[] }) {
+type ListBlock = Extract<
+  NotionBlock,
+  { type: "bulleted_list_item" | "numbered_list_item" }
+>;
+
+export function ListBlocks({
+  blocks,
+  postSlugsById = {},
+}: {
+  blocks: NotionBlock[];
+  postSlugsById?: PostSlugMap;
+}) {
   const out: React.ReactNode[] = [];
-  let buffer: any[] = [];
-  let bufferType: "bulleted_list_item" | "numbered_list_item" | null = null;
+  let buffer: ListBlock[] = [];
+  let bufferType: ListBlock["type"] | null = null;
 
   const flush = () => {
     if (!buffer.length || !bufferType) return;
-    const items = buffer.map((b) => <Block key={b.id} block={b} />);
+    const items = buffer.map((block) => (
+      <Block key={block.id} block={block} postSlugsById={postSlugsById} />
+    ));
     out.push(
       bufferType === "bulleted_list_item" ? (
         <ul
-          key={buffer[0].id + "-list"}
+          key={`${buffer[0].id}-list`}
           className="my-4 list-disc space-y-2 pl-5 marker:text-madder"
         >
           {items}
         </ul>
       ) : (
         <ol
-          key={buffer[0].id + "-list"}
+          key={`${buffer[0].id}-list`}
           className="my-4 list-decimal space-y-2 pl-5 marker:text-madder marker:font-mono marker:text-sm"
         >
           {items}
         </ol>
-      )
+      ),
     );
     buffer = [];
     bufferType = null;
@@ -42,7 +54,7 @@ export function ListBlocks({ blocks }: { blocks: any[] }) {
       buffer.push(block);
     } else {
       flush();
-      out.push(<Block key={block.id} block={block} />);
+      out.push(<Block key={block.id} block={block} postSlugsById={postSlugsById} />);
     }
   }
   flush();

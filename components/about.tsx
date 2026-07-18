@@ -28,14 +28,14 @@ export function About() {
               side="top"
               className="absolute -bottom-4 -right-4"
             >
-              <span className="flex h-12 w-12 rotate-3 items-center justify-center rounded-sm bg-madder text-ink-950">
+              <span className="flex h-12 w-12 rotate-3 items-center justify-center rounded-sm bg-madder text-paper">
                 <LotusSeal className="h-8 w-8" />
               </span>
             </Gloss>
           </div>
           <p className="mt-10 flex justify-center gap-6 font-mono text-[11px] text-paper-faint">
             <a
-              className="brush-link hover:text-paper"
+              className="brush-link hover:text-paper focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
               href="https://x.com/maanavdalal"
               target="_blank"
               rel="noopener noreferrer"
@@ -43,7 +43,7 @@ export function About() {
               Twitter
             </a>
             <a
-              className="brush-link hover:text-paper"
+              className="brush-link hover:text-paper focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
               href="https://www.linkedin.com/in/maanavdalal/"
               target="_blank"
               rel="noopener noreferrer"
@@ -57,7 +57,7 @@ export function About() {
           <SectionHeading sub="About" title="Hey, I'm Maanav" />
           <div className="space-y-5 text-base leading-relaxed text-paper-dim">
             <p>
-              By day I do Developer Relations at{" "}
+              By day I&apos;m a Developer Relations Engineer at{" "}
               <a
                 className="brush-link text-paper"
                 href="https://bfl.ai"
@@ -68,8 +68,8 @@ export function About() {
               </a>
               , which is a fancy way of saying I build demos, give talks, and
               write code that helps developers ship with FLUX. Before this I
-              was an AI Product Manager at Microsoft, where I built Foundry
-              Local and rebuilt the ONNX Runtime site.
+              was an AI Product Manager at Microsoft, where I built the Foundry
+              Local site and rebuilt the ONNX Runtime site.
             </p>
             <p>
               By night: designer, developer, and serial website rebuilder

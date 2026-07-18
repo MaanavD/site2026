@@ -2,18 +2,30 @@
 
 import { useRef } from "react";
 import dynamic from "next/dynamic";
-import { motion, useScroll, useTransform } from "motion/react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "motion/react";
 import { Gloss } from "./gloss";
 import { useWind } from "./use-wind";
 
 const StepwellCanvas = dynamic(() => import("./stepwell-canvas"), {
   ssr: false,
+  loading: () => (
+    <div
+      aria-hidden
+      className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(31,95,91,0.25),transparent_38%),linear-gradient(180deg,var(--color-ink-800),var(--color-ink-950))]"
+    />
+  ),
 });
 
 const name = "Maanav Dalal";
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const reduceMotion = useReducedMotion();
   useWind(sectionRef);
 
   // the descent rides the normal scroll: as the hero leaves the viewport,
@@ -29,7 +41,14 @@ export function Hero() {
       ref={sectionRef}
       className="relative flex h-svh min-h-[640px] items-center overflow-hidden"
     >
-      <StepwellCanvas descend={scrollYProgress} />
+      {reduceMotion ? (
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(31,95,91,0.25),transparent_38%),linear-gradient(180deg,var(--color-ink-800),var(--color-ink-950))]"
+        />
+      ) : (
+        <StepwellCanvas descend={scrollYProgress} />
+      )}
 
         <Gloss
           gloss="where I work, printed where I live"
@@ -43,12 +62,12 @@ export function Hero() {
 
         <div className="relative z-10 mx-auto w-full max-w-6xl px-6">
           <motion.p
-            initial={{ opacity: 0 }}
+            initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.2 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 1, delay: 0.2 }}
             className="font-mono text-xs uppercase tracking-[0.4em] text-turmeric"
           >
-            Developer Relations · Black Forest Labs
+            Developer Relations Engineer · Black Forest Labs
           </motion.p>
 
           <h1 className="mt-6 font-display text-6xl leading-[1.05] text-paper sm:text-7xl md:text-8xl lg:text-9xl">
@@ -58,13 +77,19 @@ export function Hero() {
                   <motion.span
                     key={i}
                     className="inline-block"
-                    initial={{ opacity: 0, y: "0.6em", rotate: 4 }}
+                    initial={
+                      reduceMotion ? false : { opacity: 0, y: "0.6em", rotate: 4 }
+                    }
                     animate={{ opacity: 1, y: 0, rotate: 0 }}
-                    transition={{
-                      duration: 0.8,
-                      delay: 0.35 + (wi * 7 + i) * 0.045,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
+                    transition={
+                      reduceMotion
+                        ? { duration: 0 }
+                        : {
+                            duration: 0.8,
+                            delay: 0.35 + (wi * 7 + i) * 0.045,
+                            ease: [0.22, 1, 0.36, 1],
+                          }
+                    }
                   >
                     {ch}
                   </motion.span>
@@ -75,9 +100,13 @@ export function Hero() {
           </h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            transition={
+              reduceMotion
+                ? { duration: 0 }
+                : { duration: 0.9, delay: 1.2, ease: [0.22, 1, 0.36, 1] }
+            }
             className="mt-8 max-w-lg text-lg leading-relaxed text-paper-dim"
           >
             I help developers build with FLUX at Black Forest Labs. Demos,
@@ -86,10 +115,11 @@ export function Hero() {
           </motion.p>
         </div>
 
-      <motion.div
-        style={{ opacity: cueOpacity }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
+      {!reduceMotion && (
+        <motion.div
+          style={{ opacity: cueOpacity }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -101,8 +131,9 @@ export function Hero() {
             animate={{ y: ["-100%", "200%"] }}
             transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
           />
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
     </section>
   );
 }

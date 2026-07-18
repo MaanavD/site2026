@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { isRead } from "@/lib/read-marks";
 import { LotusSeal } from "./motifs";
+import { useReadStatus } from "./use-local-storage-boolean";
 
 // tiny lotus seal beside posts the visitor has finished
 export function ReadStamp({ slug }: { slug: string }) {
-  const [read, setRead] = useState(false);
-
-  useEffect(() => setRead(isRead(slug)), [slug]);
+  const read = useReadStatus(slug);
   if (!read) return null;
 
   return (

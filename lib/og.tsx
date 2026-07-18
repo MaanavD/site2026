@@ -43,17 +43,20 @@ function TreeWatermark({ size, color }: { size: number; color: string }) {
 function PaisleyWatermark({ size, color }: { size: number; color: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 256 256">
-      <g
-        fill="none"
-        stroke={color}
-        strokeWidth={14}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M112 228 A 72 72 0 0 1 40 156 A 72 72 0 0 1 76 94 C 96 74 128 60 146 46 A 26 26 0 1 1 190 74 C 184 88 170 94 154 90 C 170 104 184 128 184 156 A 72 72 0 0 1 112 228 Z" />
-        <path d="M104 190 C 82 182 70 158 76 136 C 81 118 96 106 114 102" />
-      </g>
-      <circle cx="126" cy="152" r="11" fill={color} />
+      <circle cx="128" cy="128" r="86" fill="none" stroke={color} strokeWidth="5" opacity="0.5" />
+      <circle cx="128" cy="128" r="18" fill={color} opacity="0.8" />
+      {Array.from({ length: 12 }, (_, index) => (
+        <ellipse
+          key={index}
+          cx="128"
+          cy="58"
+          rx="12"
+          ry="32"
+          fill={color}
+          opacity="0.42"
+          transform={`rotate(${index * 30} 128 128)`}
+        />
+      ))}
     </svg>
   );
 }
@@ -273,7 +276,7 @@ export async function dyeCard({
               <div style={{ width: 64, height: 2, background: PEACOCK }} />
             </div>
             <div style={{ fontSize: 26 }}>
-              Developer Relations · Black Forest Labs
+              Developer Relations Engineer · Black Forest Labs
             </div>
           </div>
         </div>

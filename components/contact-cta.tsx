@@ -9,22 +9,22 @@ export function ContactCta() {
             Contact
           </p>
           <h2 className="mx-auto mt-6 max-w-3xl font-display text-5xl leading-tight text-paper md:text-7xl">
-            Let&apos;s make something worth staring at.
+            Got something weird worth building?
           </h2>
           <div className="mt-12 flex flex-wrap items-center justify-center gap-6">
             <a
               href="mailto:maanav@blackforestlabs.ai"
-              className="rounded-sm bg-madder px-8 py-4 font-medium text-ink-950 transition-transform duration-300 hover:-translate-y-0.5"
+              className="rounded-sm bg-madder px-8 py-4 font-medium text-paper transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
             >
-              Say hello
+              Send me a note
             </a>
             <a
               href="https://calendar.notion.so/meet/maanavdalal/n0b83mh4"
               target="_blank"
               rel="noopener noreferrer"
-              className="brush-link text-sm text-paper-dim hover:text-paper"
+              className="brush-link text-sm text-paper-dim hover:text-paper focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
             >
-              Or book a time →
+              Book 30 minutes →
             </a>
           </div>
         </Reveal>

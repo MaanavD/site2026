@@ -51,7 +51,7 @@ export default function ThemesPage() {
         <ThemeHero />
         <div className="pointer-events-none relative z-10 w-full px-10">
           <p className="font-mono text-xs uppercase tracking-[0.4em] text-turmeric">
-            Developer Relations · Black Forest Labs
+            Developer Relations Engineer · Black Forest Labs
           </p>
           <h2 className="mt-4 font-display text-6xl text-paper md:text-8xl">
             Maanav Dalal
@@ -64,7 +64,7 @@ export default function ThemesPage() {
 
       {/* palette */}
       <section className="mt-14">
-        <h3 className="font-display text-2xl text-paper">Palette</h3>
+        <h2 className="font-display text-2xl text-paper">Palette</h2>
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {palette.map((c) => (
             <div key={c.name} className="rounded-sm border border-paper/8 p-2">
@@ -84,7 +84,7 @@ export default function ThemesPage() {
 
       {/* type */}
       <section className="mt-14">
-        <h3 className="font-display text-2xl text-paper">Type</h3>
+        <h2 className="font-display text-2xl text-paper">Type</h2>
         <div className="mt-5 rounded-sm border border-paper/8 bg-ink-900/50 p-8">
           <p className="font-display text-4xl text-paper md:text-5xl">
             Rozha One carries the headlines
@@ -100,9 +100,9 @@ export default function ThemesPage() {
 
       {/* signature interaction */}
       <section className="mt-14">
-        <h3 className="font-display text-2xl text-paper">
+        <h2 className="font-display text-2xl text-paper">
           Signature interaction: the blockprint
-        </h3>
+        </h2>
         <p className="mt-3 max-w-lg text-sm text-paper-dim">
           Where the old theme brushed ink, this one presses wood blocks into
           cloth. Section reveals, seals, and the read-stamp all land
@@ -116,7 +116,7 @@ export default function ThemesPage() {
 
       {/* concept mapping */}
       <section className="mt-14">
-        <h3 className="font-display text-2xl text-paper">What mapped where</h3>
+        <h2 className="font-display text-2xl text-paper">What mapped where</h2>
         <ul className="mt-5 grid gap-2 text-sm text-paper-dim sm:grid-cols-2">
           {[
             ["Sumi ink hero", "stepwell + festival clock (live above)"],
@@ -126,7 +126,7 @@ export default function ThemesPage() {
             ["Koto plucks", "santoor plucks, Raag Bhupali on D"],
             ["Seasons in the shader", "kites, monsoon, marigolds, diyas"],
             ["Torii-gate 404", "a lotus adrift on dark water"],
-            ["Brush progress rail", "running-stitch embroidery line"],
+            ["Brush progress rail", "temple-border rangoli in powder"],
           ].map(([from, to]) => (
             <li
               key={from}

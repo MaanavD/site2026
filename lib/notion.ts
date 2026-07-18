@@ -1,106 +1,63 @@
-import { Client } from "@notionhq/client";
-import { generateSlug, getPropertyValue, isPageObjectResponse } from "./type-guards";
+import "server-only";
+
+import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import { mockPosts } from "./mock-posts";
+import {
+  getNotionClient,
+  getNotionDatabaseId,
+  hasNotionToken,
+} from "./notion/client";
+import {
+  fetchBlockTree,
+  fetchPosts as fetchPostsFromNotion,
+} from "./notion/data";
+import { isNormalizedSlug } from "./notion/normalize";
+import type { NotionBlock, Post } from "./notion/types";
 
-const notion = new Client({ auth: process.env.NOTION_TOKEN });
+const CACHE_SECONDS = 3600;
 
-export const databaseId = process.env.NOTION_DATABASE_ID;
+const getCachedPosts = unstable_cache(
+  async () =>
+    fetchPostsFromNotion(getNotionClient(), getNotionDatabaseId()),
+  ["notion-posts-v2"],
+  {
+    revalidate: CACHE_SECONDS,
+    tags: ["notion", "notion-posts"],
+  },
+);
 
-export type Post = {
-  id: string;
-  slug: string;
-  title: string;
-  date: string;
-  category: string | null;
-  isMock?: boolean;
-};
+const getCachedBlockTree = unstable_cache(
+  async (blockId: string) => fetchBlockTree(getNotionClient(), blockId),
+  ["notion-block-tree-v2"],
+  {
+    revalidate: CACHE_SECONDS,
+    tags: ["notion", "notion-blocks"],
+  },
+);
 
 export const hasNotionConfig = () =>
-  Boolean(process.env.NOTION_TOKEN && databaseId);
+  hasNotionToken() && Boolean(process.env.NOTION_DATABASE_ID?.trim());
 
-export const getDatabase = async () => {
-  try {
-    if (!hasNotionConfig()) return [];
-    const response = await notion.databases.query({
-      database_id: databaseId as string,
-      sorts: [{ property: "Date", direction: "descending" }],
-    });
-    return response.results;
-  } catch (error) {
-    console.error("Error fetching Notion database:", error);
-    return [];
-  }
-};
+export const getPosts = cache(async (): Promise<Post[]> => {
+  if (!hasNotionConfig()) return mockPosts;
+  return getCachedPosts();
+});
 
-export const getPosts = async (): Promise<Post[]> => {
-  const pages = await getDatabase();
-  if (pages.length === 0 && !hasNotionConfig()) return mockPosts;
+export const getPostBySlug = cache(
+  async (slug: string): Promise<Post | null> => {
+    if (!isNormalizedSlug(slug)) return null;
+    const posts = await getPosts();
+    return posts.find((post) => post.slug === slug) ?? null;
+  },
+);
 
-  return pages
-    .filter(isPageObjectResponse)
-    .filter(
-      // Category "TBD" marks drafts in the Notion database
-      (page: any) =>
-        getPropertyValue(page.properties, "Category", "select")?.name !== "TBD"
-    )
-    .map((page: any) => {
-    const props = page.properties;
-    const titleProp: any =
-      Object.values(props).find((p: any) => p?.type === "title") ?? null;
-    const title = titleProp?.title
-      ? titleProp.title.map((t: any) => t.plain_text ?? "").join("")
-      : "Untitled";
-    const slugRich = getPropertyValue(props, "Slug", "rich_text");
-    const slug =
-      (slugRich?.map((t: any) => t.plain_text ?? "").join("") ||
-        generateSlug(titleProp?.title ?? [])) ??
-      page.id;
-    const date = getPropertyValue(props, "Date", "date")?.start ?? "";
-    const category = getPropertyValue(props, "Category", "select")?.name ?? null;
+export const getBlocksWithChildren = cache(
+  async (blockId: string): Promise<NotionBlock[]> => {
+    if (!hasNotionToken()) return [];
+    return getCachedBlockTree(blockId);
+  },
+);
 
-    return { id: page.id, slug, title, date, category };
-  });
-};
-
-export const getPostBySlug = async (slug: string): Promise<Post | null> => {
-  const posts = await getPosts();
-  return posts.find((p) => p.slug === slug) ?? null;
-};
-
-export const getBlocksWithChildren = async (blockId: string): Promise<any[]> => {
-  const blocks = await getBlocks(blockId);
-
-  return Promise.all(
-    blocks.map(async (block: any) => {
-      if (!("has_children" in block) || !block.has_children || !("type" in block)) {
-        return block;
-      }
-      const blockDetails = block[block.type];
-      if (!blockDetails) return block;
-
-      const children = await getBlocksWithChildren(block.id);
-      return { ...block, [block.type]: { ...blockDetails, children } };
-    })
-  );
-};
-
-export const getBlocks = async (blockId: string) => {
-  try {
-    const blocks = [];
-    let cursor;
-    while (true) {
-      const { results, next_cursor }: any = await notion.blocks.children.list({
-        start_cursor: cursor,
-        block_id: blockId,
-        page_size: 100,
-      });
-      blocks.push(...results);
-      if (!next_cursor) break;
-      cursor = next_cursor;
-    }
-    return blocks;
-  } catch (error) {
-    console.error("Error fetching Notion blocks:", error);
-    return [];
-  }
-};
+export const getBlocks = getBlocksWithChildren;
+export type { NotionBlock, Post } from "./notion/types";

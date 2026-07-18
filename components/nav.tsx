@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { TransitionLink } from "./ink-transition";
 import { Gloss } from "./gloss";
 import { LotusSeal } from "./motifs";
@@ -16,30 +16,31 @@ const links = [
 
 export function Nav() {
   const pathname = usePathname();
+  const reduceMotion = useReducedMotion();
 
   const scrollToHash = (e: React.MouseEvent, href: string) => {
     if (!href.startsWith("/#") || pathname !== "/") return;
     e.preventDefault();
     document
       .querySelector(href.slice(1))
-      ?.scrollIntoView({ behavior: "smooth" });
+      ?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
     history.replaceState(null, "", href);
   };
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-gradient-to-b from-ink-950/90 via-ink-950/50 to-transparent">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
         <TransitionLink
           href="/"
           aria-label="Home"
-          className="group flex items-center gap-3"
+          className="group flex items-center gap-3 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
         >
           <Gloss gloss="a lotus, carved like a stamp" side="bottom">
             {/* the seal leaps when pressed. small, strong, back in a beat */}
             <motion.span
-              whileTap={{ y: -9, rotate: 10, scale: 1.08 }}
+              whileTap={reduceMotion ? undefined : { y: -9, rotate: 10, scale: 1.08 }}
               transition={{ type: "spring", stiffness: 500, damping: 14 }}
-              className="flex h-9 w-9 items-center justify-center rounded-sm bg-madder text-ink-950 transition-transform duration-300 group-hover:rotate-6"
+              className="flex h-9 w-9 items-center justify-center rounded-sm bg-madder text-paper transition-transform duration-300 group-hover:rotate-6"
             >
               <LotusSeal className="h-6 w-6" />
             </motion.span>
@@ -48,25 +49,27 @@ export function Nav() {
             Maanav Dalal
           </span>
         </TransitionLink>
-        <ul className="flex items-center gap-5 text-sm sm:gap-7">
+        <ul className="flex items-center gap-3 text-sm sm:gap-7">
           {links.map((l) => (
             <li key={l.href}>
               <TransitionLink
                 href={l.href}
                 onClick={(e) => scrollToHash(e, l.href)}
                 data-active={
-                  l.href !== "/#work" &&
-                  l.href !== "/#about" &&
-                  l.href !== "/#contact" &&
-                  pathname.startsWith(l.href)
+                  l.href === "/blog" && pathname.startsWith("/blog")
                 }
-                className="brush-link text-paper-dim transition-colors hover:text-paper"
+                aria-current={
+                  l.href === "/blog" && pathname.startsWith("/blog")
+                    ? "page"
+                    : undefined
+                }
+                className="brush-link text-paper-dim transition-colors hover:text-paper focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
               >
                 {l.label}
               </TransitionLink>
             </li>
           ))}
-          <li className="flex">
+          <li className="hidden min-[360px]:flex">
             <SoundToggle />
           </li>
         </ul>

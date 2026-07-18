@@ -1,4 +1,4 @@
-import type { Post } from "./notion";
+import type { Post } from "./notion/types";
 
 // Shown only when NOTION_TOKEN is missing so the design is previewable.
 export const mockPosts: Post[] = [

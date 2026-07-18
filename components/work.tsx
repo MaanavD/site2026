@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { SectionHeading } from "./section-heading";
 import {
   Buti,
@@ -11,7 +11,6 @@ import {
   RiverLines,
   TreeOfLife,
 } from "./motifs";
-import { pluck } from "@/lib/sound";
 
 // one quiet ascending note per bolt, Sa Ga Pa Sa' Ga'
 const BOLT_NOTES = [0, 2, 3, 5, 7];
@@ -23,7 +22,7 @@ const FG = {
   light: {
     title: "",
     body: "group-data-[on=true]:text-paper/85",
-    meta: "group-data-[on=true]:text-paper/75",
+    meta: "group-data-[on=true]:text-paper",
     link: "group-data-[on=true]:text-paper",
     chip: "group-data-[on=true]:bg-paper",
     pattern: "text-paper",
@@ -153,17 +152,22 @@ function PrintLayer({
 export function Work() {
   const [active, setActive] = useState(0);
   const shelfRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
 
   const activate = (i: number) => {
     setActive((prev) => {
-      if (prev !== i) pluck(BOLT_NOTES[i % BOLT_NOTES.length], 0.035);
+      if (prev !== i) {
+        void import("@/lib/sound").then(({ pluck }) =>
+          pluck(BOLT_NOTES[i % BOLT_NOTES.length], 0.035),
+        );
+      }
       return i;
     });
   };
 
   // no hover on touch: the bolt snapped to centre prints itself instead
   useEffect(() => {
-    if (window.matchMedia("(hover: hover)").matches) return;
+    if (!window.matchMedia("(max-width: 767px)").matches) return;
     const shelf = shelfRef.current;
     const bolts = shelf?.querySelectorAll<HTMLElement>("[data-idx]");
     if (!bolts?.length) return;
@@ -193,6 +197,7 @@ export function Work() {
 
       <div
         ref={shelfRef}
+        aria-label="Selected work"
         className="-mx-6 flex snap-x snap-mandatory gap-2 overflow-x-auto px-6 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:h-[26rem] md:snap-none md:overflow-hidden md:px-0 md:pb-0"
       >
         {projects.map((p, i) => (
@@ -205,11 +210,15 @@ export function Work() {
             data-on={active === i}
             onMouseEnter={() => activate(i)}
             onFocus={() => activate(i)}
-            initial={{ opacity: 0, y: 24 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.7, ease: EASE, delay: i * 0.07 }}
-            className="group relative block h-[24rem] max-w-sm flex-[0_0_84vw] snap-center overflow-hidden rounded-sm border border-paper/8 bg-ink-900 transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-2 focus-visible:outline-turmeric md:h-full md:max-w-none md:flex-[1_1_0%] md:data-[on=true]:flex-[5.5_1_0%]"
+            transition={
+              reduceMotion
+                ? { duration: 0 }
+                : { duration: 0.7, ease: EASE, delay: i * 0.07 }
+            }
+            className="group relative block h-[24rem] max-w-sm flex-[0_0_84vw] snap-center overflow-hidden rounded-sm border border-paper/8 bg-ink-900 transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turmeric md:h-full md:max-w-none md:flex-[1_1_0%] md:data-[on=true]:flex-[5.5_1_0%]"
           >
             {/* the vat tips: dye floods the cloth from the left */}
             <span

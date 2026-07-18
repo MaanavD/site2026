@@ -14,9 +14,10 @@
   --color-paper-faint: #8f897c;
 
   /* natural-dye accents */
-  --color-bloom: #1c2642;
   --color-peacock: #1f5f5b;
+  --color-peacock-powder: #3f8f87;
   --color-madder: #8f3b2e;
+  --color-madder-powder: #b85a45;
   --color-turmeric: #d9a441;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
@@ -107,6 +108,7 @@ body {
 }
 
 .brush-link:hover::after,
+.brush-link:focus-visible::after,
 .brush-link[data-active="true"]::after {
   transform: scaleX(1);
   transform-origin: left;
@@ -292,6 +294,37 @@ body {
   transition: text-decoration-color 0.2s;
 }
 
-.prose-ink a:hover {
+.prose-ink a:hover,
+.prose-ink a:focus-visible {
   text-decoration-color: var(--color-turmeric);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .grain::after,
+  .fog,
+  .fog-slow,
+  .rangoli-burst,
+  .prose-ink > *,
+  .prose-ink > figure,
+  .prose-ink > blockquote {
+    animation: none !important;
+    clip-path: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
 }
