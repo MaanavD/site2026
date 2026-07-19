@@ -7,8 +7,12 @@ import { useInkTransition } from "./ink-transition";
 
 type Pt = { x: number; y: number; t: number };
 
-// Invisible: watches the native cursor for a drawn circle.
-// A recognized circle blooms a rangoli and opens the courtyard.
+const TAU = Math.PI * 2;
+
+// Invisible: watches the native cursor for a *deliberately drawn* circle —
+// one continuous, round, closed loop. Ambient arcs from reading or moving
+// around the page are ignored. A recognized circle blooms a rangoli and
+// opens the courtyard.
 export function EnsoListener() {
   const { navigate } = useInkTransition();
   const pathname = usePathname();
@@ -20,48 +24,91 @@ export function EnsoListener() {
   useEffect(() => {
     if (reduceMotion || !window.matchMedia("(pointer: fine)").matches) return;
 
-    const pts: Pt[] = [];
-    let last = 0;
+    let stroke: Pt[] = [];
+    let lastMove = 0;
+    let cooldownUntil = 0;
 
     const onMove = (e: PointerEvent) => {
-      pts.push({ x: e.clientX, y: e.clientY, t: performance.now() });
-      if (pts.length > 160) pts.shift();
-
       const now = performance.now();
-      if (now - last < 4000 || pathname === "/garden") return;
-      const win = pts.filter((p) => now - p.t < 2000);
-      if (win.length < 24) return;
 
+      // A pause ends the current gesture — a drawn circle is one continuous
+      // motion, so we start fresh after any noticeable hitch. This drops the
+      // path taken *to* the circle so it can't skew the center.
+      if (now - lastMove > 200) stroke = [];
+      lastMove = now;
+
+      stroke.push({ x: e.clientX, y: e.clientY, t: now });
+      while (stroke.length && now - stroke[0].t > 3000) stroke.shift();
+      if (stroke.length > 260) stroke.shift();
+
+      if (now < cooldownUntil || pathname === "/garden") return;
+      if (stroke.length < 20) return;
+
+      // Rough center of the whole stroke — good enough to find where the last
+      // revolution began by winding backwards from the newest point.
+      let gx = 0,
+        gy = 0;
+      for (const p of stroke) {
+        gx += p.x;
+        gy += p.y;
+      }
+      gx /= stroke.length;
+      gy /= stroke.length;
+
+      let wound = 0;
+      let prev = Math.atan2(
+        stroke[stroke.length - 1].y - gy,
+        stroke[stroke.length - 1].x - gx
+      );
+      let start = 0;
+      for (let i = stroke.length - 2; i >= 0; i--) {
+        const a = Math.atan2(stroke[i].y - gy, stroke[i].x - gx);
+        let d = prev - a;
+        if (d > Math.PI) d -= TAU;
+        if (d < -Math.PI) d += TAU;
+        wound += d;
+        prev = a;
+        if (Math.abs(wound) >= TAU - 0.35) {
+          start = i;
+          break;
+        }
+      }
+      // Never came close to a full turn — not a circle.
+      if (Math.abs(wound) < TAU - 0.35) return;
+
+      const loop = stroke.slice(start);
+      if (loop.length < 16) return;
+
+      // Validate roundness and closure on the isolated revolution only.
       let cx = 0,
         cy = 0;
-      for (const p of win) {
+      for (const p of loop) {
         cx += p.x;
         cy += p.y;
       }
-      cx /= win.length;
-      cy /= win.length;
+      cx /= loop.length;
+      cy /= loop.length;
 
-      const radii = win.map((p) => Math.hypot(p.x - cx, p.y - cy));
+      const radii = loop.map((p) => Math.hypot(p.x - cx, p.y - cy));
       const mean = radii.reduce((a, b) => a + b, 0) / radii.length;
-      if (mean < 40 || mean > 380) return;
-      const variance =
-        radii.reduce((a, r) => a + (r - mean) ** 2, 0) / radii.length;
-      if (Math.sqrt(variance) / mean > 0.32) return;
+      const maxR = Math.min(
+        480,
+        0.45 * Math.min(window.innerWidth, window.innerHeight)
+      );
+      if (mean < 34 || mean > maxR) return;
 
-      let sweep = 0;
-      let prev = Math.atan2(win[0].y - cy, win[0].x - cx);
-      for (let i = 1; i < win.length; i++) {
-        const a = Math.atan2(win[i].y - cy, win[i].x - cx);
-        let d = a - prev;
-        if (d > Math.PI) d -= 2 * Math.PI;
-        if (d < -Math.PI) d += 2 * Math.PI;
-        sweep += d;
-        prev = a;
-      }
-      if (Math.abs(sweep) < 5.5) return;
+      const sd = Math.sqrt(
+        radii.reduce((a, r) => a + (r - mean) ** 2, 0) / radii.length
+      );
+      if (sd / mean > 0.3) return;
 
-      last = now;
-      pts.length = 0;
+      // The loop must return near where it began.
+      const a0 = loop[0];
+      const aN = loop[loop.length - 1];
+      if (Math.hypot(aN.x - a0.x, aN.y - a0.y) > 0.6 * mean) return;
+
+      cooldownUntil = now + 1500;
+      stroke = [];
       setBurst({ x: cx, y: cy, k: now });
       setTimeout(() => navigate("/garden"), 550);
     };

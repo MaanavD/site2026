@@ -5,7 +5,10 @@ const nextConfig: NextConfig = {
     "/**": ["./assets/**"],
   },
   images: {
-    localPatterns: [{ pathname: "/api/notion-media/**" }],
+    localPatterns: [
+      { pathname: "/api/notion-media/**" },
+      { pathname: "/maanav.jpg" },
+    ],
     remotePatterns: [
       { protocol: "https", hostname: "**.amazonaws.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
