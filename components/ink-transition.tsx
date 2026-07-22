@@ -173,7 +173,7 @@ export function InkTransition({ children }: { children: React.ReactNode }) {
           })()}
 
         {/* the clicked title rides the wipe and settles into the post header */}
-        {morph && phase !== "idle" && (
+        {morph && (
           <motion.span
             className="absolute z-10 origin-top-left whitespace-nowrap font-display leading-tight text-paper"
             style={{ fontSize: morph.fontSize }}

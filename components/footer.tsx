@@ -67,6 +67,16 @@ export async function Footer() {
               </a>
             </li>
             <li>
+              <a
+                className="brush-link hover:text-paper focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric"
+                href="https://drive.google.com/file/d/1_5GPPM1D1QHuYY-QlpikEZnQSkIDKP7i/view?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Resume
+              </a>
+            </li>
+            <li>
               <Link className="brush-link hover:text-paper focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-turmeric" href="/blog/rss.xml">
                 RSS
               </Link>
