@@ -11,8 +11,6 @@ import {
   TennisBall,
 } from "./motifs";
 
-// each pursuit is a hand-carved printing block; the captions are lifted
-// from the blog, where these already have their stories
 const pursuits = [
   {
     label: "Coffee",
@@ -22,7 +20,7 @@ const pursuits = [
   {
     label: "Gym",
     icon: Barbell,
-    line: "130 to 150 to 120. I know what this body can do",
+    line: "taking the gym (slightly too) seriously",
   },
   {
     label: "Climbing",
@@ -32,17 +30,17 @@ const pursuits = [
   {
     label: "Skiing",
     icon: Skier,
-    line: "pointing the skis at the fear, one double black at a time",
+    line: "fully present, mostly trying not to wipe out",
   },
   {
     label: "Jiu-Jitsu",
     icon: Fist,
-    line: "tap a higher belt: technique over strength",
+    line: "getting destroyed, enthusiastically",
   },
   {
     label: "Tennis",
     icon: TennisBall,
-    line: "still failing to rally. still showing up",
+    line: "serve. miss. reset.",
   },
 ];
 
