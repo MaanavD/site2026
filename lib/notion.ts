@@ -9,10 +9,11 @@ import {
   hasNotionToken,
 } from "./notion/client";
 import {
+  fetchBlockChildren,
   fetchBlockTree,
   fetchPosts as fetchPostsFromNotion,
 } from "./notion/data";
-import { isNormalizedSlug } from "./notion/normalize";
+import { blockPlainText, isNormalizedSlug } from "./notion/normalize";
 import type { NotionBlock, Post } from "./notion/types";
 
 const CACHE_SECONDS = 3600;
@@ -61,3 +62,32 @@ export const getBlocksWithChildren = cache(
 
 export const getBlocks = getBlocksWithChildren;
 export type { NotionBlock, Post } from "./notion/types";
+
+// first paragraph only, from the top level: cheap enough to run for every
+// post in a list without walking the whole block tree
+const getCachedExcerpt = unstable_cache(
+  async (blockId: string) => {
+    const blocks = await fetchBlockChildren(getNotionClient(), blockId);
+    for (const block of blocks) {
+      if (block.type !== "paragraph") continue;
+      const text = blockPlainText(block).replace(/\s+/g, " ").trim();
+      if (text) return text;
+    }
+    return "";
+  },
+  ["notion-excerpt-v1"],
+  {
+    revalidate: CACHE_SECONDS,
+    tags: ["notion", "notion-blocks"],
+  },
+);
+
+export const getExcerpt = cache(async (post: Post): Promise<string> => {
+  if (post.isMock || !hasNotionToken()) return "";
+  try {
+    return await getCachedExcerpt(post.id);
+  } catch (error) {
+    console.error(`Unable to load excerpt for ${post.slug}`, error);
+    return "";
+  }
+});

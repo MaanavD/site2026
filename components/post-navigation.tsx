@@ -22,6 +22,7 @@ export function PostNavigation({
       {newer ? (
         <TransitionLink
           href={`/blog/${newer.slug}`}
+          turn="newer"
           className="group bg-ink-950 py-6 pr-5 transition-colors hover:bg-ink-900 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-turmeric sm:pr-8"
         >
           <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-paper-faint">
@@ -38,6 +39,7 @@ export function PostNavigation({
       {older ? (
         <TransitionLink
           href={`/blog/${older.slug}`}
+          turn="older"
           className="group bg-ink-950 py-6 pl-5 text-right transition-colors hover:bg-ink-900 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-turmeric sm:pl-8"
         >
           <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-paper-faint">

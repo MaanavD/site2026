@@ -7,9 +7,9 @@ export const SITE_NAME = "Maanav Dalal";
 export const AUTHOR_NAME = "Maanav Dalal";
 export const RSS_PATH = "/blog/rss.xml";
 export const SITE_DESCRIPTION =
-  "Developer Relations Engineer at Black Forest Labs. Building demos, giving talks, and writing about AI, design, and life.";
+  "Developer Relations Engineer at Black Forest Labs. Demos, talks, and code for developers building with FLUX, plus a blog that takes the scenic route.";
 export const BLOG_DESCRIPTION =
-  "Notes on life, AI, and everything in between (they wander a bit on the way).";
+  "Mostly life, sometimes AI, written on planes and long train rides.";
 export const HOME_TITLE =
   "Maanav Dalal · Developer Relations Engineer at Black Forest Labs";
 

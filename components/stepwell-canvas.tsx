@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { useReducedMotion, type MotionValue } from "motion/react";
@@ -25,6 +25,11 @@ const fragmentShader = /* glsl */ `
   uniform float u_scene;
   uniform float u_season;
   uniform float u_descend;
+  uniform float u_stir;
+  uniform float u_textOn;
+  uniform vec4 u_textRect;
+  uniform sampler2D u_text;
+  uniform vec3 u_stones[4];
 
   float hash(vec2 p) {
     p = fract(p * vec2(123.34, 456.21));
@@ -90,6 +95,35 @@ const fragmentShader = /* glsl */ `
     float k = cell / steps;
     k += (hash(vec2(cell, seed)) - 0.5) * 0.04;
     return base + rise * riseAmt + k * profScale;
+  }
+
+  // Chand Baori's walls: flights of stairs crossing each other in a lattice,
+  // cut from sandstone that sits in indigo shadow. treads take the light,
+  // risers keep the dark, and the diagonal edges of every flight catch the
+  // last of the sky. the whole wall climbs past you as you descend
+  vec3 stone(vec2 uv, float aspect, float layer, float lift, vec3 rimCol,
+    float rimAmt) {
+    vec2 w = vec2(abs(uv.x - 0.5) * aspect, uv.y - lift * (0.9 + 0.35 * layer));
+    float S = 38.0 + layer * 9.0;
+    vec2 g = w * S;
+    float a = g.x + g.y;
+    float b = g.x - g.y;
+    float flight = 6.0;
+    float checker = mod(floor(a / flight) + floor(b / flight), 2.0);
+    float fy = fract(g.y);
+    float tread = smoothstep(0.62, 0.5, fy);
+    float lip = smoothstep(0.5, 0.44, fy) * smoothstep(0.36, 0.44, fy);
+    float edgeA = smoothstep(0.10, 0.0, abs(fract(a / flight) - 0.5) - 0.40);
+    float edgeB = smoothstep(0.10, 0.0, abs(fract(b / flight) - 0.5) - 0.40);
+    float grain = fbm(g * 0.33 + layer * 13.1) * 0.6 + noise(g * 3.1) * 0.2;
+    vec3 sand = mix(vec3(0.085, 0.095, 0.15), vec3(0.21, 0.185, 0.19), grain);
+    sand *= 0.84 + 0.26 * tread;
+    sand *= mix(0.82, 1.06, checker);
+    sand += rimCol * (edgeA + edgeB) * 0.075 * rimAmt;
+    sand += rimCol * lip * 0.06 * rimAmt;
+    // light thins with depth, and pools near the centre where the sky is
+    sand *= (1.0 - layer * 0.14) * (0.72 + 0.28 * smoothstep(0.9, 0.2, w.x));
+    return sand;
   }
 
   void main() {
@@ -171,6 +205,8 @@ const fragmentShader = /* glsl */ `
 
     // ---- the descent: the well's tiers climb as you scroll down into it
     float rise = dd * dd * (3.0 - 2.0 * dd); // smooth
+    // the well is there before you scroll; the descent only deepens it
+    float lift = mix(0.62, 1.3, rise);
     dyeAmt = mix(dyeAmt, 1.2, rise);
 
     // ---- sky
@@ -227,36 +263,78 @@ const fragmentShader = /* glsl */ `
 
     // ---- the stepwell: four walls of stairs, nearer ones darker and
     // faster, each edge catching a thin line of the last light
-    float rimFade = rimAmt * (1.0 - rise * 0.5);
+    float rimFade = rimAmt * (1.0 + rise * 0.6);
     vec3 rimCol = sunCol;
 
-    float surf0 = tierSurf(uv.x, 4.0, 1.0, -0.35, 0.53, 0.25, rise);
+    float surf0 = tierSurf(uv.x, 4.0, 1.0, -0.35, 0.53, 0.25, lift);
     float m0 = smoothstep(surf0 + 0.003, surf0 - 0.003, uv.y);
-    col = mix(col, vec3(0.085, 0.100, 0.165), m0);
+    col = mix(col, stone(uv, aspect, 0.0, lift, rimCol, rimFade), m0);
     col += rimCol * m0 * smoothstep(0.014, 0.0, surf0 - uv.y) * rimFade;
 
-    float surf1 = tierSurf(uv.x, 5.0, 2.0, -0.55, 0.78, 0.35, rise);
+    float surf1 = tierSurf(uv.x, 5.0, 2.0, -0.55, 0.78, 0.35, lift);
     float m1 = smoothstep(surf1 + 0.003, surf1 - 0.003, uv.y);
-    col = mix(col, vec3(0.060, 0.073, 0.125), m1);
+    col = mix(col, stone(uv, aspect, 1.0, lift, rimCol, rimFade), m1);
     col += rimCol * m1 * smoothstep(0.014, 0.0, surf1 - uv.y) * rimFade * 0.85;
 
-    float surf2 = tierSurf(uv.x, 6.0, 3.0, -0.80, 1.06, 0.48, rise);
+    float surf2 = tierSurf(uv.x, 6.0, 3.0, -0.80, 1.06, 0.48, lift);
     float m2 = smoothstep(surf2 + 0.003, surf2 - 0.003, uv.y);
-    col = mix(col, vec3(0.040, 0.050, 0.090), m2);
+    col = mix(col, stone(uv, aspect, 2.0, lift, rimCol, rimFade), m2);
     col += rimCol * m2 * smoothstep(0.014, 0.0, surf2 - uv.y) * rimFade * 0.7;
 
-    float surf3 = tierSurf(uv.x, 7.0, 4.0, -1.10, 1.38, 0.62, rise);
+    float surf3 = tierSurf(uv.x, 7.0, 4.0, -1.10, 1.38, 0.62, lift);
     float m3 = smoothstep(surf3 + 0.003, surf3 - 0.003, uv.y);
-    col = mix(col, vec3(0.022, 0.028, 0.055), m3);
+    col = mix(col, stone(uv, aspect, 3.0, lift, rimCol, rimFade), m3);
     col += rimCol * m3 * smoothstep(0.014, 0.0, surf3 - uv.y) * rimFade * 0.55;
 
     // ---- still water at the bottom of the well
-    float waterY = 0.17 * rise;
-    float wellX = smoothstep(0.34, 0.18, abs(uv.x - 0.5));
+    float waterY = 0.21 * lift;
+    float wellX = smoothstep(0.50, 0.30, abs(uv.x - 0.5));
     float ripple = fbm(vec2(uv.x * 14.0, uv.y * 40.0 - t * 0.35) + md * 0.8);
-    float waterM = smoothstep(waterY, waterY - 0.025, uv.y) * wellX * rise;
+    float waterM = smoothstep(waterY, waterY - 0.02, uv.y) * wellX;
     vec3 waterCol = mix(vec3(0.015, 0.020, 0.045), skyHor * 0.5, ripple * 0.4);
     col = mix(col, waterCol, waterM * 0.92);
+
+    // ---- dropped stones: each one sends rings out through the pool for a
+    // few seconds, then the water forgets
+    float rings = 0.0;
+    for (int i = 0; i < 4; i++) {
+      vec3 st = u_stones[i];
+      float age = t - st.z;
+      if (age <= 0.0 || age > 4.5) continue;
+      float sd3 = distance(vec2(uv.x * aspect, uv.y * 0.35), vec2(st.x * aspect, st.y * 0.35));
+      // the wave front travels outward; behind it the water keeps rocking
+      float front = age * 0.28;
+      float band = exp(-abs(sd3 - front) * 9.0);
+      rings += sin(sd3 * 48.0 - age * 6.0) * (band * 1.6 + exp(-sd3 * 3.0) * 0.5)
+        * exp(-age * 0.55) * smoothstep(0.0, 0.06, age);
+      // the splash: a brief bloom where the stone hit
+      rings += exp(-sd3 * 40.0) * exp(-age * 4.0) * 2.5;
+    }
+    col += skyHor * rings * waterM * 0.35;
+    col += vec3(0.86, 0.80, 0.66) * max(rings, 0.0) * waterM * 0.12;
+
+    // the surface line, a thread of the sky's last light
+    col += skyHor * smoothstep(0.006, 0.0, abs(uv.y - waterY)) * wellX * 0.5;
+
+    // ---- the pool holds the name upside down. the sky's noise shivers it,
+    // and a hand over the water sends rings through the letters
+    if (u_textOn > 0.5 && waterM > 0.002) {
+      float fy = clamp(uv.y / max(waterY, 0.001), 0.0, 1.0);
+      vec2 rip = (vec2(
+        fbm(vec2(uv.x * 22.0, uv.y * 70.0 - t * 0.6)),
+        fbm(vec2(uv.x * 11.0 + 4.0, uv.y * 35.0 - t * 0.4))
+      ) - 0.5) * vec2(0.010, 0.12);
+      float sd2 = distance(vec2(uv.x * aspect, uv.y), vec2(m.x * aspect, m.y));
+      rip.y += sin(sd2 * 80.0 - t * 7.0) * exp(-sd2 * 7.0) * exp(-u_stir * 1.4) * 0.07;
+      rip.y += rings * 0.22;
+      rip.x += rings * 0.035;
+      float tx = (uv.x - u_textRect.x) / max(u_textRect.z - u_textRect.x, 0.001) + rip.x;
+      float tv = (1.0 - fy) * 1.12 - 0.04 + rip.y;
+      float inside = step(0.0, tx) * step(tx, 1.0) * step(0.0, tv) * step(tv, 1.0);
+      float glyph = texture2D(u_text, vec2(tx, tv)).a * inside;
+      float fade = smoothstep(0.0, 0.5, fy) * (0.3 + 0.7 * fy);
+      col += vec3(0.86, 0.80, 0.66) * glyph * waterM * fade * 0.42;
+    }
     for (int i = 0; i < 3; i++) {
       float gx = 0.40 + 0.10 * float(i);
       float flick = 0.6 + 0.4 * sin(t * 1.7 + float(i) * 2.9);
@@ -319,7 +397,7 @@ const fragmentShader = /* glsl */ `
       float odd = mod(fi, 2.0);
       float shelf = tierSurf(lx, mix(5.0, 6.0, odd), mix(2.0, 3.0, odd),
         mix(-0.55, -0.80, odd), mix(0.78, 1.06, odd),
-        mix(0.35, 0.48, odd), rise) + 0.015;
+        mix(0.35, 0.48, odd), lift) + 0.015;
       float ly = mix(driftY, clamp(shelf, 0.05, 0.9), rise);
       float pulse = max(0.0, sin(t * (1.2 + seed.x) + fi * 5.0));
       float fd = distance(vec2(uv.x * aspect, uv.y), vec2(lx * aspect, ly));
@@ -335,7 +413,7 @@ const fragmentShader = /* glsl */ `
       float ph = fract(t / cycle);
       float id = floor(t / cycle);
       float lx = 0.25 + 0.5 * hash(vec2(id, 21.7));
-      float ground = tierSurf(lx, 5.0, 2.0, -0.55, 0.78, 0.35, rise);
+      float ground = tierSurf(lx, 5.0, 2.0, -0.55, 0.78, 0.35, lift);
       vec2 a = vec2(lx * aspect, max(ground, 0.05) + 0.015);
       vec2 sunPix = vec2(sunPos.x * aspect, sunPos.y + rise * 0.35);
       vec2 b = sunPix - vec2(0.0, sunR + 0.015);
@@ -393,32 +471,128 @@ const fragmentShader = /* glsl */ `
   }
 `;
 
-export function sceneFromHour(hour: number) {
-  if (hour >= 5 && hour < 10) return 1;
-  if (hour >= 10 && hour < 17) return 2;
-  if (hour >= 17 && hour < 21) return 3;
-  return 0;
-}
+import { sceneFromHour, seasonFromMonth } from "./well-clock";
 
-export function seasonFromMonth(month: number) {
-  if (month >= 2 && month <= 4) return 1; // spring
-  if (month >= 5 && month <= 7) return 2; // summer
-  if (month >= 8 && month <= 10) return 3; // autumn
-  return 0; // winter (Uttarayan season)
+// the name, drawn once into a texture in the page's own display face so the
+// water can hold it; re-drawn whenever the heading moves or resizes
+function useNameTexture(
+  textRef: React.RefObject<HTMLElement | null> | undefined,
+  canvasEl: HTMLCanvasElement,
+) {
+  const store = useMemo(
+    () => ({ texture: new THREE.Texture(), rect: new THREE.Vector4() }),
+    [],
+  );
+  const [on, setOn] = useState(false);
+
+  useEffect(() => {
+    const el = textRef?.current;
+    if (!el) return;
+    let cancelled = false;
+
+    const draw = () => {
+      const h = textRef?.current;
+      if (cancelled || !h) return;
+      const r = h.getBoundingClientRect();
+      const c = canvasEl.getBoundingClientRect();
+      if (!r.width || !c.width) return;
+      store.rect.set(
+        (r.left - c.left) / c.width,
+        1 - (r.bottom - c.top) / c.height,
+        (r.right - c.left) / c.width,
+        1 - (r.top - c.top) / c.height,
+      );
+      const style = getComputedStyle(h);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const cv = document.createElement("canvas");
+      cv.width = Math.ceil(r.width * dpr);
+      cv.height = Math.ceil(r.height * dpr);
+      const ctx = cv.getContext("2d");
+      if (!ctx) return;
+      const size = parseFloat(style.fontSize) * dpr;
+      ctx.font = `${style.fontWeight} ${size}px ${style.fontFamily}`;
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const text = h.textContent?.replace(/\s+/g, " ").trim() ?? "";
+      const words = text.split(" ");
+      const half = Math.ceil(words.length / 2);
+      const lines =
+        ctx.measureText(text).width > cv.width && words.length > 1
+          ? [words.slice(0, half).join(" "), words.slice(half).join(" ")]
+          : [text];
+      const lh = parseFloat(style.lineHeight) * dpr || size * 1.05;
+      const top = cv.height / 2 - ((lines.length - 1) * lh) / 2;
+      lines.forEach((line, i) => ctx.fillText(line, cv.width / 2, top + i * lh));
+      store.texture.image = cv;
+      store.texture.needsUpdate = true;
+      setOn(true);
+    };
+
+    const ready = () => document.fonts.ready.then(() => requestAnimationFrame(draw));
+    ready();
+    const ro = new ResizeObserver(() => ready());
+    ro.observe(el);
+    ro.observe(canvasEl);
+    return () => {
+      cancelled = true;
+      ro.disconnect();
+    };
+  }, [textRef, canvasEl, store]);
+
+  return { ...store, on };
 }
 
 function StepwellPlane({
   scene,
   season,
   descend,
+  textRef,
 }: {
   scene: number;
   season: number;
   descend?: MotionValue<number>;
+  textRef?: React.RefObject<HTMLElement | null>;
 }) {
   const mat = useRef<THREE.ShaderMaterial>(null);
   const gl = useThree((s) => s.gl);
   const targetMouse = useRef(new THREE.Vector2(0.5, 0.5));
+  const lastMove = useRef(-10);
+  const name = useNameTexture(textRef, gl.domElement);
+  const clock = useRef(0);
+  const stones = useMemo(
+    () => Array.from({ length: 4 }, () => new THREE.Vector3(0, 0, -100)),
+    [],
+  );
+  const nextStone = useRef(0);
+  const lastDrop = useRef(0);
+  const descendRef = useRef(0);
+
+  // a press on the pool drops a stone: rings in the water, one soft note.
+  // the pool is the bottom band of the canvas, wherever the tiers have risen to
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      if (e.button !== 0) return;
+      const rect = gl.domElement.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = 1 - (e.clientY - rect.top) / rect.height;
+      if (x < 0 || x > 1 || y < 0) return;
+      const d = descendRef.current;
+      const rise = d * d * (3 - 2 * d);
+      const waterY = 0.21 * (0.62 + 0.38 * rise);
+      if (y > waterY) return;
+      const now = performance.now();
+      if (now - lastDrop.current < 160) return;
+      lastDrop.current = now;
+      stones[nextStone.current % stones.length].set(x, y, clock.current);
+      nextStone.current += 1;
+      void import("@/lib/sound").then(({ pluck }) =>
+        pluck(Math.floor(Math.random() * 5), 0.05),
+      );
+    };
+    window.addEventListener("pointerdown", onDown);
+    return () => window.removeEventListener("pointerdown", onDown);
+  }, [gl, stones]);
 
   // mouse in canvas-local UV space, so tracking holds at any viewport,
   // scroll offset, or zoom level
@@ -429,6 +603,7 @@ function StepwellPlane({
         (e.clientX - rect.left) / rect.width,
         1 - (e.clientY - rect.top) / rect.height
       );
+      lastMove.current = performance.now() / 1000;
     };
     window.addEventListener("pointermove", onMove);
     return () => window.removeEventListener("pointermove", onMove);
@@ -438,6 +613,7 @@ function StepwellPlane({
     if (!mat.current) return;
     const u = mat.current.uniforms;
     u.u_time.value += delta;
+    clock.current = u.u_time.value;
     // gl_FragCoord is in device pixels, the resolution must match it,
     // or every retina screen renders the scene misaligned and stretched
     u.u_resolution.value.set(gl.domElement.width, gl.domElement.height);
@@ -446,6 +622,10 @@ function StepwellPlane({
     u.u_season.value += (season - u.u_season.value) * 0.03;
     const d = descend?.get() ?? 0;
     u.u_descend.value += (d - u.u_descend.value) * 0.15;
+    descendRef.current = u.u_descend.value;
+    u.u_stir.value = Math.min(6, performance.now() / 1000 - lastMove.current);
+    u.u_textOn.value = name.on ? 1 : 0;
+    u.u_textRect.value.copy(name.rect);
   });
 
   return (
@@ -462,7 +642,13 @@ function StepwellPlane({
           u_scene: { value: scene },
           u_season: { value: season },
           u_descend: { value: 0 },
+          u_stir: { value: 6 },
+          u_textOn: { value: 0 },
+          u_textRect: { value: new THREE.Vector4() },
+          u_text: { value: name.texture },
+          u_stones: { value: stones },
         }}
+        transparent={false}
       />
     </mesh>
   );
@@ -472,10 +658,12 @@ export default function StepwellCanvas({
   scene,
   season,
   descend,
+  textRef,
 }: {
   scene?: number;
   season?: number;
   descend?: MotionValue<number>;
+  textRef?: React.RefObject<HTMLElement | null>;
 }) {
   const resolvedScene = scene ?? sceneFromHour(new Date().getHours());
   const resolvedSeason = season ?? seasonFromMonth(new Date().getMonth());
@@ -514,6 +702,7 @@ export default function StepwellCanvas({
           scene={resolvedScene}
           season={resolvedSeason}
           descend={descend}
+          textRef={textRef}
         />
       </Canvas>
     </div>

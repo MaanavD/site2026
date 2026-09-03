@@ -3,11 +3,9 @@ import { Reveal } from "./reveal";
 export function SectionHeading({
   motif,
   title,
-  sub,
 }: {
   motif?: React.ReactNode;
   title: string;
-  sub?: string;
 }) {
   return (
     <Reveal className="relative mb-14">
@@ -19,12 +17,7 @@ export function SectionHeading({
           {motif}
         </span>
       )}
-      <p className="font-mono text-xs uppercase tracking-[0.35em] text-turmeric">
-        {sub}
-      </p>
-      <h2 className="mt-3 font-display text-4xl text-paper md:text-5xl">
-        {title}
-      </h2>
+      <h2 className="font-display text-4xl text-paper md:text-5xl">{title}</h2>
     </Reveal>
   );
 }

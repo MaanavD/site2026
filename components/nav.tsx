@@ -1,6 +1,12 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import {
+  motion,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+} from "motion/react";
+import { useState } from "react";
 import { TransitionLink } from "./ink-transition";
 import { Gloss } from "./gloss";
 import { LotusSeal } from "./motifs";
@@ -18,6 +24,16 @@ export function Nav() {
   const pathname = usePathname();
   const reduceMotion = useReducedMotion();
 
+  // reading wants a clear page: the bar steps out while you scroll down and
+  // comes back the moment you scroll up
+  const { scrollY } = useScroll();
+  const [hidden, setHidden] = useState(false);
+  useMotionValueEvent(scrollY, "change", (y) => {
+    const prev = scrollY.getPrevious() ?? y;
+    if (y > 140 && y > prev + 2) setHidden(true);
+    else if (y < prev - 2 || y < 80) setHidden(false);
+  });
+
   const scrollToHash = (e: React.MouseEvent, href: string) => {
     if (!href.startsWith("/#") || pathname !== "/") return;
     e.preventDefault();
@@ -28,7 +44,10 @@ export function Nav() {
   };
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 bg-gradient-to-b from-ink-950/90 via-ink-950/50 to-transparent">
+    <header
+      data-hidden={hidden}
+      className="fixed top-0 inset-x-0 z-50 bg-gradient-to-b from-[rgba(14,18,32,0.92)] via-[rgba(14,18,32,0.55)] to-transparent transition-transform duration-500 ease-[var(--ease-cloth)] data-[hidden=true]:-translate-y-full"
+    >
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
         <TransitionLink
           href="/"
@@ -49,7 +68,7 @@ export function Nav() {
             Maanav Dalal
           </span>
         </TransitionLink>
-        <ul className="flex items-center gap-3 text-sm sm:gap-7">
+        <ul className="flex items-center gap-3 text-base sm:gap-7">
           {links.map((l) => (
             <li key={l.href}>
               <TransitionLink

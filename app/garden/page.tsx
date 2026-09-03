@@ -50,10 +50,10 @@ function rng(seed: string) {
 }
 
 const POWDERS = [
-  "var(--color-madder)",
-  "var(--color-turmeric)",
-  "var(--color-peacock)",
-  "var(--color-paper-dim)",
+  "var(--madder)",
+  "var(--turmeric)",
+  "var(--peacock)",
+  "var(--paper-dim)",
 ];
 
 type Ring = {
@@ -186,13 +186,10 @@ export default async function GardenPage() {
         <Rangoli seed="courtyard" />
       </span>
       <Reveal>
-        <p className="font-mono text-xs uppercase tracking-[0.35em] text-turmeric">
-          Secret Found
-        </p>
-        <h1 className="mt-4 font-display text-5xl text-paper md:text-6xl">
+        <h1 className="font-display text-5xl text-paper md:text-6xl">
           The Rangoli Courtyard
         </h1>
-        <p className="mt-5 max-w-md text-paper-dim">
+        <p className="mt-5 max-w-md text-lg text-paper-dim">
           You drew a circle and the site noticed. Every piece of writing here
           draws its own rangoli: same seed, same pattern, every visit. The
           courtyard grows when I write.

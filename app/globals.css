@@ -1,29 +1,32 @@
 @import "tailwindcss";
 
-@theme {
-  /* vat indigo scale ("ink" now means indigo dye) */
-  --color-ink-950: #0e1220;
-  --color-ink-900: #141b31;
-  --color-ink-800: #1c2642;
-  --color-ink-700: #2b3a63;
-  --color-ink-600: #3e4f80;
+/* every colour is a reference, never a literal, and the theme is inline so
+   utilities carry the reference itself: a scope can re-dye the whole palette
+   (the blog's khadi sheet swaps ink and paper) and opacity modifiers follow
+   along via color-mix instead of baked-in hex */
+@theme inline {
+  --color-ink-950: var(--ink-950);
+  --color-ink-900: var(--ink-900);
+  --color-ink-800: var(--ink-800);
+  --color-ink-700: var(--ink-700);
+  --color-ink-600: var(--ink-600);
 
-  /* khadi ("paper" now means unbleached khadi cloth) */
-  --color-paper: #ece2cc;
-  --color-paper-dim: #b5ac97;
-  --color-paper-faint: #8f897c;
+  --color-paper: var(--paper);
+  --color-paper-dim: var(--paper-dim);
+  --color-paper-faint: var(--paper-faint);
 
-  /* natural-dye accents */
-  --color-peacock: #1f5f5b;
-  --color-peacock-powder: #3f8f87;
-  --color-madder: #8f3b2e;
-  --color-madder-powder: #b85a45;
-  --color-turmeric: #d9a441;
+  --color-peacock: var(--peacock);
+  --color-peacock-powder: var(--peacock-powder);
+  --color-madder: var(--madder);
+  --color-madder-powder: var(--madder-powder);
+  --color-turmeric: var(--turmeric);
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-newsreader), Georgia, "Times New Roman", serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-display: var(--font-rozha), Georgia, serif;
+}
 
+@theme {
   --animate-marquee: marquee 40s linear infinite;
 
   @keyframes marquee {
@@ -37,15 +40,46 @@
 }
 
 :root {
+  /* vat indigo scale ("ink" means indigo dye) */
+  --ink-950: #0e1220;
+  --ink-900: #141b31;
+  --ink-800: #1c2642;
+  --ink-700: #2b3a63;
+  --ink-600: #3e4f80;
+
+  /* khadi ("paper" means unbleached khadi cloth) */
+  --paper: #ece2cc;
+  --paper-dim: #b5ac97;
+  --paper-faint: #8f897c;
+
+  /* natural-dye accents */
+  --peacock: #1f5f5b;
+  --peacock-powder: #3f8f87;
+  --madder: #8f3b2e;
+  --madder-powder: #b85a45;
+  --turmeric: #d9a441;
+
+  /* physical things keep their colour on any cloth: a carved block is indigo
+     wood whether it sits on the table or on the sheet */
+  --vat-700: #2b3a63;
+  --vat-900: #141b31;
+  --khadi: #ece2cc;
+  --khadi-dim: #b5ac97;
+
+  /* one hand moves every piece of cloth on the site: bolts unrolling, sheets
+     turning. same ease, same tempo */
+  --ease-cloth: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-cloth: 720ms;
+
   color-scheme: dark;
-  scrollbar-color: color-mix(in srgb, var(--color-madder) 70%, var(--color-ink-700))
-    var(--color-ink-950);
+  scrollbar-color: color-mix(in srgb, var(--madder) 70%, var(--ink-700))
+    var(--ink-950);
   scrollbar-width: thin;
 }
 
 body {
-  background: var(--color-ink-950);
-  color: var(--color-paper);
+  background: var(--ink-950);
+  color: var(--paper);
   font-family: var(--font-sans);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -53,8 +87,87 @@ body {
 }
 
 ::selection {
-  background: var(--color-madder);
-  color: var(--color-ink-950);
+  background: var(--madder);
+  color: var(--ink-950);
+}
+
+/* the khadi sheet: a piece of cloth laid on the indigo table. inside it the
+   palette is re-dyed, ink becomes khadi and khadi becomes ink, so every
+   utility written for the dark site prints correctly on the light cloth */
+.sheet,
+.sheet-band {
+  --ink-950: #ece2cc;
+  --ink-900: #e4d9c0;
+  --ink-800: #d9ccb0;
+  --ink-700: #c9bb9c;
+  --ink-600: #b3a487;
+
+  --paper: #0e1220;
+  --paper-dim: #2f3854;
+  --paper-faint: #6b7089;
+
+  --turmeric: #8a5a12;
+  --peacock: #1a4f4b;
+
+  color-scheme: light;
+  position: relative;
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgba(255, 250, 238, 0.55), transparent 60%),
+    var(--ink-950);
+  color: var(--paper);
+}
+
+/* a full-width bolt of khadi across the table, hemmed with one madder thread
+   top and bottom */
+.sheet-band::before,
+.sheet-band::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: color-mix(in srgb, var(--madder) 55%, transparent);
+  pointer-events: none;
+}
+
+.sheet-band::before {
+  top: 10px;
+}
+
+.sheet-band::after {
+  bottom: 10px;
+}
+
+.sheet {
+  box-shadow:
+    0 1px 0 rgba(255, 250, 238, 0.6) inset,
+    0 40px 90px -30px rgba(0, 0, 0, 0.75),
+    0 12px 30px -12px rgba(0, 0, 0, 0.6);
+}
+
+/* the printed frame, concentric with the cloth's edge */
+.sheet::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 1px solid color-mix(in srgb, var(--madder) 45%, transparent);
+  pointer-events: none;
+}
+
+.sheet ::selection {
+  background: var(--madder);
+  color: #ece2cc;
+}
+
+/* a sheet caught mid-turn is a still copy: nothing on it animates */
+.leaf,
+.leaf * {
+  animation: none !important;
+  transition: none !important;
+}
+
+.leaf .prose-ink {
+  opacity: 1 !important;
 }
 
 /* paper grain over everything */
@@ -66,9 +179,8 @@ body {
   height: 200%;
   pointer-events: none;
   z-index: 100;
-  opacity: 0.05;
+  opacity: 0.045;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: grain-shift 0.9s steps(4) infinite;
 }
 
 @keyframes grain-shift {
@@ -101,7 +213,7 @@ body {
   bottom: -4px;
   height: 1px;
   width: 100%;
-  background: var(--color-madder);
+  background: var(--madder);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
@@ -176,51 +288,9 @@ body {
   }
 }
 
-.prose-ink > * {
+.prose-ink {
   animation: rise-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: 1.2s;
-}
-
-.prose-ink > *:nth-child(1) {
-  animation-delay: 0.75s;
-}
-.prose-ink > *:nth-child(2) {
-  animation-delay: 0.84s;
-}
-.prose-ink > *:nth-child(3) {
-  animation-delay: 0.93s;
-}
-.prose-ink > *:nth-child(4) {
-  animation-delay: 1.02s;
-}
-.prose-ink > *:nth-child(5) {
-  animation-delay: 1.11s;
-}
-
-/* where scroll timelines exist, every block forms as it enters the page
-   instead of a one-shot stagger; images wipe in like a brush stroke */
-@supports (animation-timeline: view()) {
-  .prose-ink > * {
-    animation: rise-in ease-out both;
-    animation-delay: 0s;
-    animation-timeline: view();
-    animation-range: entry 5% entry 55%;
-  }
-
-  .prose-ink > *:nth-child(-n + 3) {
-    /* the opening lines still arrive with the header, not the scroll */
-    animation: rise-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: 0.8s;
-    animation-timeline: auto;
-  }
-
-  .prose-ink > figure {
-    animation-name: ink-wipe-in;
-  }
-
-  .prose-ink > blockquote {
-    animation-name: quote-draw;
-  }
+  animation-delay: 0.7s;
 }
 
 @keyframes ink-wipe-in {
@@ -254,9 +324,9 @@ body {
   padding-top: 0.05em;
   margin-bottom: -0.1em;
   font-family: var(--font-display);
-  font-size: 3em;
+  font-size: 2.1em;
   line-height: 1;
-  color: var(--color-turmeric);
+  color: var(--turmeric);
 }
 
 /* modern initial-letter: browser handles sizing and baseline alignment */
@@ -267,27 +337,28 @@ body {
     line-height: unset;
     padding-top: unset;
     margin-bottom: unset;
-    initial-letter: 3;
-    -webkit-initial-letter: 3;
+    initial-letter: 2;
+    -webkit-initial-letter: 2;
     padding-right: 0.12em;
     font-family: var(--font-display);
-    color: var(--color-turmeric);
+    color: var(--turmeric);
   }
 }
 
 /* prose defaults for notion content */
 .prose-ink {
-  font-size: 1.075rem;
-  line-height: 1.85;
-  color: color-mix(in srgb, var(--color-paper) 88%, transparent);
+  font-size: 1.2rem;
+  line-height: 1.7;
+  font-variation-settings: "opsz" 18;
+  color: color-mix(in srgb, var(--paper) 88%, transparent);
 }
 
 .prose-ink a {
-  color: var(--color-turmeric);
+  color: var(--turmeric);
   text-decoration: underline;
   text-decoration-color: color-mix(
     in srgb,
-    var(--color-turmeric) 40%,
+    var(--turmeric) 40%,
     transparent
   );
   text-underline-offset: 3px;
@@ -296,7 +367,7 @@ body {
 
 .prose-ink a:hover,
 .prose-ink a:focus-visible {
-  text-decoration-color: var(--color-turmeric);
+  text-decoration-color: var(--turmeric);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -304,13 +375,10 @@ body {
     scroll-behavior: auto;
   }
 
-  .grain::after,
   .fog,
   .fog-slow,
   .rangoli-burst,
-  .prose-ink > *,
-  .prose-ink > figure,
-  .prose-ink > blockquote {
+  .prose-ink {
     animation: none !important;
     clip-path: none !important;
     opacity: 1 !important;

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Newsreader } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { InkTransition } from "@/components/ink-transition";
@@ -16,9 +16,11 @@ import {
   SITE_URL,
 } from "@/lib/seo";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
 });
 
 const geistMono = Geist_Mono({
@@ -70,7 +72,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${rozha.variable} h-full antialiased`}
+      className={`${newsreader.variable} ${geistMono.variable} ${rozha.variable} h-full antialiased`}
     >
       <body className="grain min-h-full flex flex-col">
         <a

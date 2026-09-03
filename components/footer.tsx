@@ -28,7 +28,7 @@ export async function Footer() {
               <Gloss gloss="a lotus, carved like a stamp" side="top">
                 <LotusSeal className="h-7 w-7 shrink-0 text-madder md:h-8 md:w-8" />
               </Gloss>
-              <span>made by hand, block by block</span>
+              <span>version seven, still meandering</span>
             </p>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-paper-dim">
               Demos and talks at Black Forest Labs. Meandering everywhere
@@ -90,7 +90,7 @@ export async function Footer() {
         </div>
         <div className="mt-12 flex flex-col items-start gap-2 text-xs text-paper-faint sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 Maanav Dalal</p>
-          <p>Set in Rozha One · Dyed live in WebGL</p>
+          <p>Set in Rozha One and Newsreader · Dyed live in WebGL</p>
         </div>
       </div>
     </footer>

@@ -4,7 +4,7 @@ import { PostHeader } from "@/components/post-header";
 import { PostShell } from "@/components/post-shell";
 import { PostNavigation } from "@/components/post-navigation";
 import { getPosts, getPostBySlug, getBlocksWithChildren } from "@/lib/notion";
-import { formatDate } from "@/lib/format";
+import { formatDate, mostCommon } from "@/lib/format";
 import { ListBlocks } from "@/components/notion/list-blocks";
 import {
   absoluteUrl,
@@ -80,6 +80,8 @@ export default async function PostPage({
   ]);
   const description = descriptionFromBlocks(blocks, fallbackDescription(post));
   const postIndex = posts.findIndex((candidate) => candidate.slug === post.slug);
+  // the tag every post carries says nothing; only the odd ones out print
+  const usual = mostCommon(posts.map((p) => p.category));
   const postSlugsById = Object.fromEntries(
     posts.map((candidate) => [candidate.id, candidate.slug]),
   );
@@ -120,7 +122,7 @@ export default async function PostPage({
       <PostHeader
         title={post.title}
         date={formatDate(post.date)}
-        category={post.category}
+        category={post.category === usual ? null : post.category}
       />
 
       {post.isMock ? (

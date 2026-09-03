@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     localPatterns: [
       { pathname: "/api/notion-media/**" },
       { pathname: "/maanav.jpg" },
+      { pathname: "/work/**" },
     ],
     remotePatterns: [
       { protocol: "https", hostname: "**.amazonaws.com" },

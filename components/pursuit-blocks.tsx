@@ -44,9 +44,19 @@ const pursuits = [
   },
 ];
 
+// six stamps in a row, framed the way everything on the cloth is framed:
+// an outline and a finer inner line. pressing one floods it with madder
+// and swaps the caption
 export function PursuitBlocks() {
   const [active, setActive] = useState<number | null>(null);
   const reduceMotion = useReducedMotion();
+
+  const press = (i: number) => {
+    if (active !== i) {
+      void import("@/lib/sound").then(({ press }) => press());
+    }
+    setActive(i);
+  };
 
   return (
     <div onPointerLeave={() => setActive(null)}>
@@ -55,18 +65,13 @@ export function PursuitBlocks() {
           <li key={p.label}>
             <motion.button
               type="button"
-              onPointerEnter={() => {
-                if (active !== i) {
-                  void import("@/lib/sound").then(({ press }) => press());
-                }
-                setActive(i);
-              }}
-              onFocus={() => setActive(i)}
+              onPointerEnter={() => press(i)}
+              onFocus={() => press(i)}
               onBlur={() => setActive(null)}
-              whileHover={reduceMotion ? undefined : { y: 2, scale: 0.96 }}
-              whileTap={reduceMotion ? undefined : { y: 3, scale: 0.94 }}
+              whileHover={reduceMotion ? undefined : { scale: 0.97 }}
+              whileTap={reduceMotion ? undefined : { scale: 0.94 }}
               transition={{ type: "spring", stiffness: 500, damping: 26 }}
-              className="group relative flex aspect-square w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-sm border border-paper/12 bg-ink-900 shadow-[0_3px_0_rgba(0,0,0,0.35)] transition-shadow duration-300 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turmeric"
+              className="group relative flex aspect-square w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-[3px] border border-paper/40 transition-colors duration-300 hover:border-madder focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turmeric"
               aria-describedby="pursuit-description"
             >
               {/* madder ink flooding up from the pad */}
@@ -77,16 +82,17 @@ export function PursuitBlocks() {
               {/* the carve line inside the block's edge */}
               <span
                 aria-hidden
-                className="pointer-events-none absolute inset-[5px] rounded-[1px] border border-paper/10 transition-colors duration-300 group-hover:border-paper/35 group-focus-visible:border-paper/35"
+                className="pointer-events-none absolute inset-[5px] rounded-[2px] border border-paper/12 transition-colors duration-300 group-hover:border-[rgba(236,226,204,0.45)] group-focus-visible:border-[rgba(236,226,204,0.45)]"
               />
-              <p.icon className="relative h-6 w-6 text-paper-dim transition-colors duration-300 group-hover:text-paper group-focus-visible:text-paper sm:h-7 sm:w-7" />
-              <span className="relative text-[10px] font-mono tracking-wide text-paper-faint transition-colors duration-300 group-hover:text-paper group-focus-visible:text-paper">
+              <p.icon className="relative h-6 w-6 text-paper transition-colors duration-300 group-hover:text-[var(--khadi)] group-focus-visible:text-[var(--khadi)] sm:h-7 sm:w-7" />
+              <span className="relative text-[10px] font-mono tracking-wide text-paper-faint transition-colors duration-300 group-hover:text-[var(--khadi)] group-focus-visible:text-[var(--khadi)]">
                 {p.label}
               </span>
             </motion.button>
           </li>
         ))}
       </ul>
+
       <div className="mt-4 min-h-5">
         <AnimatePresence mode="wait" initial={false}>
           <motion.p
@@ -98,11 +104,11 @@ export function PursuitBlocks() {
             exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
             transition={{ duration: reduceMotion ? 0 : 0.18 }}
             className={`font-mono text-[11px] tracking-wide ${
-              active === null ? "text-paper-faint" : "text-turmeric"
+              active === null ? "text-paper-faint" : "text-madder"
             }`}
           >
             {active === null
-              ? "strength and play, in equal measure"
+              ? "things I do badly, often, and happily"
               : pursuits[active].line}
           </motion.p>
         </AnimatePresence>

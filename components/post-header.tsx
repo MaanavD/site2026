@@ -3,8 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { TransitionLink, useInkTransition } from "./ink-transition";
-import { Gloss } from "./gloss";
-import { RiverLines } from "./motifs";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -55,7 +53,7 @@ export function PostHeader({
   }, [isMorph]);
 
   return (
-    <header className="mb-14">
+    <header className="mb-12">
       <motion.div
         initial={reduceMotion ? false : { opacity: 0, x: -12 }}
         animate={{ opacity: 1, x: 0 }}
@@ -127,30 +125,6 @@ export function PostHeader({
         </h1>
       )}
 
-      <div
-        aria-hidden
-        className="mt-8 flex items-center gap-4 text-paper-faint"
-      >
-        <motion.span
-          className="h-px w-16 origin-left bg-madder/60"
-          initial={reduceMotion ? false : { scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={
-            reduceMotion ? { duration: 0 } : { duration: 0.8, delay: 0.9, ease }
-          }
-        />
-        <Gloss gloss="writing meanders. rivers agree." side="top">
-          <motion.span
-            initial={reduceMotion ? false : { opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={
-              reduceMotion ? { duration: 0 } : { duration: 0.6, delay: 1.1, ease }
-            }
-          >
-            <RiverLines className="h-5 w-5" />
-          </motion.span>
-        </Gloss>
-      </div>
     </header>
   );
 }

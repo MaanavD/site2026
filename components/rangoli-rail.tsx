@@ -26,10 +26,10 @@ const rnd = (i: number, s: number) =>
   fract(Math.sin(i * 127.1 + s * 311.7) * 43758.5453);
 
 const POWDER = {
-  rice: "var(--color-paper)",
-  turmeric: "var(--color-turmeric)",
-  madder: "var(--color-madder-powder)",
-  peacock: "var(--color-peacock-powder)",
+  rice: "var(--paper)",
+  turmeric: "var(--turmeric)",
+  madder: "var(--madder-powder)",
+  peacock: "var(--peacock-powder)",
 };
 
 const STEPS = 3;

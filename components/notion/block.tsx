@@ -66,13 +66,13 @@ export default function Block({
     case "paragraph":
       if (!block.children?.length) {
         return (
-          <p className="my-5">
+          <p className="my-[1.35em]">
             <Text text={block.paragraph.rich_text} />
           </p>
         );
       }
       return (
-        <div className="my-5">
+        <div className="my-[1.35em]">
           <p>
             <Text text={block.paragraph.rich_text} />
           </p>
@@ -83,19 +83,19 @@ export default function Block({
       );
     case "heading_1":
       return (
-        <h2 className="mt-14 mb-5 border-l-2 border-madder pl-4 font-display text-3xl text-paper">
+        <h2 className="mt-14 mb-4 font-display text-[1.75rem] leading-tight text-paper">
           <Text text={block.heading_1.rich_text} />
         </h2>
       );
     case "heading_2":
       return (
-        <h3 className="mt-10 mb-4 font-display text-2xl text-paper">
+        <h3 className="mt-10 mb-3 font-display text-2xl leading-tight text-paper">
           <Text text={block.heading_2.rich_text} />
         </h3>
       );
     case "heading_3":
       return (
-        <h4 className="mt-8 mb-3 font-display text-xl text-paper">
+        <h4 className="mt-8 mb-2 font-display text-xl leading-tight text-paper">
           <Text text={block.heading_3.rich_text} />
         </h4>
       );
@@ -172,7 +172,7 @@ export default function Block({
           <div className="relative">
             <span
               aria-hidden
-              className="absolute -left-2 -top-2 h-full w-full rounded-sm border border-madder/35"
+              className="absolute -inset-2 rounded-sm border border-madder/40"
             />
             <div className="relative overflow-hidden rounded-sm border border-paper/10">
               <Image
@@ -211,13 +211,7 @@ export default function Block({
       );
     case "quote":
       return (
-        <blockquote className="relative my-10 rounded-sm border border-paper/8 border-l-2 border-l-madder bg-ink-900/70 py-5 pl-7 pr-6 font-display text-xl leading-relaxed text-paper/90 italic">
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -top-1 left-2 font-display text-5xl not-italic leading-none text-madder/25"
-          >
-            &ldquo;
-          </span>
+        <blockquote className="my-9 border-l-2 border-madder/70 pl-6 text-[1.1em] italic leading-relaxed text-paper/85">
           <Text text={block.quote.rich_text} />
         </blockquote>
       );

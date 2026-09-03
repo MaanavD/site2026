@@ -17,11 +17,22 @@ type Phase = "idle" | "covering" | "revealing";
 
 type MorphFrom = { text: string; x: number; y: number; fontSize: number };
 type MorphTarget = { x: number; y: number; fontSize: number };
+export type TurnDir = "older" | "newer";
+
+// a sheet caught mid-turn: a clone of the cloth, exactly where it lay
+type Leaf = {
+  node: HTMLElement;
+  rect: { top: number; left: number; width: number; height: number };
+  dir: 1 | -1;
+};
 
 type TransitionApi = {
-  navigate: (href: string, morph?: MorphFrom) => boolean;
+  navigate: (href: string, morph?: MorphFrom, turn?: TurnDir) => boolean;
   morphText: string | null;
   morphDone: boolean;
+  // set while a page turn is in flight: the arriving sheet slides in from
+  // the side the old one did not leave by
+  turnDir: 1 | -1 | null;
   registerMorphTarget: (t: MorphTarget) => void;
 };
 
@@ -29,6 +40,7 @@ const TransitionContext = createContext<TransitionApi>({
   navigate: () => false,
   morphText: null,
   morphDone: true,
+  turnDir: null,
   registerMorphTarget: () => {},
 });
 
@@ -54,9 +66,9 @@ const motifFor = (href: string): MotifKey =>
 
 // the stamp-pad kiss of madder first, then the dye takes the page
 const layers = [
-  { color: "var(--color-madder)", delay: 0 },
-  { color: "var(--color-ink-800)", delay: 0.05 },
-  { color: "var(--color-ink-950)", delay: 0.1 },
+  { color: "var(--madder)", delay: 0 },
+  { color: "var(--ink-800)", delay: 0.05 },
+  { color: "var(--ink-950)", delay: 0.1 },
 ];
 
 export function InkTransition({ children }: { children: React.ReactNode }) {
@@ -68,10 +80,11 @@ export function InkTransition({ children }: { children: React.ReactNode }) {
   const [morph, setMorph] = useState<MorphFrom | null>(null);
   const [morphTarget, setMorphTarget] = useState<MorphTarget | null>(null);
   const [morphDone, setMorphDone] = useState(true);
+  const [leaf, setLeaf] = useState<Leaf | null>(null);
   const target = useRef<string | null>(null);
 
-  const navigate = useCallback((href: string, morphFrom?: MorphFrom) => {
-    if (phase !== "idle") return false;
+  const navigate = useCallback((href: string, morphFrom?: MorphFrom, turn?: TurnDir) => {
+    if (phase !== "idle" || leaf) return false;
     if (href === pathname) {
       window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
       return true;
@@ -79,6 +92,27 @@ export function InkTransition({ children }: { children: React.ReactNode }) {
     if (reduceMotion) {
       router.push(href);
       return true;
+    }
+
+    // turning a page: lift the sheet off the table, no dye between posts
+    if (turn) {
+      const sheet = document.querySelector<HTMLElement>("article .sheet");
+      if (sheet) {
+        const r = sheet.getBoundingClientRect();
+        const node = sheet.cloneNode(true) as HTMLElement;
+        node.removeAttribute("id");
+        node.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+        // a copy must not replay its entrance: freeze every animation on it
+        node.classList.add("leaf");
+        setLeaf({
+          node,
+          rect: { top: r.top, left: r.left, width: r.width, height: r.height },
+          dir: turn === "older" ? -1 : 1,
+        });
+        void import("@/lib/sound").then(({ press }) => press());
+        router.push(href);
+        return true;
+      }
     }
 
     target.current = href;
@@ -90,7 +124,7 @@ export function InkTransition({ children }: { children: React.ReactNode }) {
     setPhase("covering");
     void import("@/lib/sound").then(({ transitionMotif }) => transitionMotif());
     return true;
-  }, [pathname, phase, reduceMotion, router]);
+  }, [leaf, pathname, phase, reduceMotion, router]);
 
   useEffect(() => {
     if (phase === "covering" && target.current === null && pathname) {
@@ -111,10 +145,43 @@ export function InkTransition({ children }: { children: React.ReactNode }) {
         navigate,
         morphText: morph?.text ?? null,
         morphDone,
+        turnDir: leaf?.dir ?? null,
         registerMorphTarget: setMorphTarget,
       }}
     >
       {children}
+
+      {/* the sheet on its way off the table */}
+      {leaf && (
+        <motion.div
+          aria-hidden
+          className="pointer-events-none fixed z-[85] overflow-hidden rounded-[2px]"
+          style={{
+            top: leaf.rect.top,
+            left: leaf.rect.left,
+            width: leaf.rect.width,
+            height: leaf.rect.height,
+            transformOrigin: leaf.dir < 0 ? "0% 100%" : "100% 100%",
+          }}
+          initial={{ x: 0, y: 0, rotate: 0, opacity: 1 }}
+          animate={{
+            x: leaf.dir * (leaf.rect.width * 1.15 + 80),
+            y: -70,
+            rotate: leaf.dir * 6,
+            opacity: [1, 1, 0.85],
+            boxShadow: [
+              "0 20px 60px -20px rgba(0,0,0,0.55)",
+              "0 60px 120px -30px rgba(0,0,0,0.75)",
+              "0 40px 90px -30px rgba(0,0,0,0.5)",
+            ],
+          }}
+          transition={{ duration: 0.85, ease: [0.4, 0, 0.2, 1] }}
+          onAnimationComplete={() => setLeaf(null)}
+          ref={(el) => {
+            if (el && !el.hasChildNodes()) el.appendChild(leaf.node);
+          }}
+        />
+      )}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-[90]">
         {layers.map((l, i) => (
           <motion.div
@@ -175,7 +242,7 @@ export function InkTransition({ children }: { children: React.ReactNode }) {
         {/* the clicked title rides the wipe and settles into the post header */}
         {morph && (
           <motion.span
-            className="absolute z-10 origin-top-left whitespace-nowrap font-display leading-tight text-paper"
+            className="absolute z-10 origin-top-left whitespace-nowrap font-display leading-tight text-[#ece2cc] mix-blend-difference"
             style={{ fontSize: morph.fontSize }}
             initial={{ x: morph.x, y: morph.y, scale: 1 }}
             animate={
@@ -205,8 +272,9 @@ export function TransitionLink({
   children,
   onClick,
   morph = false,
+  turn,
   ...rest
-}: React.ComponentProps<typeof Link> & { morph?: boolean }) {
+}: React.ComponentProps<typeof Link> & { morph?: boolean; turn?: TurnDir }) {
   const { navigate } = useInkTransition();
 
   return (
@@ -243,7 +311,7 @@ export function TransitionLink({
           }
         }
         e.preventDefault();
-        navigate(h, morphFrom);
+        navigate(h, morphFrom, turn);
       }}
     >
       {children}

@@ -7,6 +7,8 @@ import { LotusSeal } from "./motifs";
 import { RangoliRail } from "./rangoli-rail";
 import { markPostRead, useReadStatus } from "./use-local-storage-boolean";
 
+// a sheet of khadi laid on the indigo table: the article prints on the cloth,
+// the rangoli runs down the table beside it
 export function PostShell({
   slug,
   children,
@@ -21,14 +23,19 @@ export function PostShell({
   });
 
   return (
-    <article ref={ref} className="relative mx-auto max-w-3xl px-6 pt-36 pb-28">
-      {/* reading progress: a temple-border rangoli laid down the margin.
-          the dot grid is marked the whole way; the powder follows the
-          reader, and the rail signs itself with the lotus at the foot */}
+    <article
+      ref={ref}
+      className="relative mx-auto max-w-[52rem] pt-28 pb-24 sm:px-6 sm:pt-32"
+    >
       <RangoliRail progress={scrollYProgress} slug={slug} />
-      {children}
-      {/* below lg there is no rail, so the seal stays in the column */}
-      <EndHanko slug={slug} />
+      <div className="sheet px-6 py-14 sm:rounded-[2px] sm:px-12 sm:py-16 md:px-16 md:py-20">
+        {/* the measure: about 65 characters of Newsreader, centred on the cloth */}
+        <div className="mx-auto max-w-[40rem]">
+          {children}
+          {/* below lg there is no rail, so the seal stays on the cloth */}
+          <EndHanko slug={slug} />
+        </div>
+      </div>
     </article>
   );
 }
@@ -52,7 +59,7 @@ function EndHanko({ slug }: { slug: string }) {
 
   return (
     <div ref={ref} className="mt-20 flex flex-col items-center gap-3 lg:hidden">
-      <Gloss gloss="stamped. you finished it." side="top">
+      <Gloss gloss="you made it to the end" side="top">
         <motion.span
           initial={
             already
@@ -67,7 +74,7 @@ function EndHanko({ slug }: { slug: string }) {
               ? { duration: 0 }
               : { type: "spring", stiffness: 320, damping: 19 }
           }
-          className="flex h-14 w-14 items-center justify-center rounded-sm bg-madder text-paper shadow-[0_0_30px_rgba(143,59,46,0.35)]"
+          className="flex h-14 w-14 items-center justify-center rounded-sm bg-madder text-[#ece2cc] shadow-[0_0_30px_rgba(143,59,46,0.35)]"
         >
           <LotusSeal className="h-9 w-9" />
         </motion.span>
